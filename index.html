@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SaúdeBI — Monitoramento Hospitalar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0f1117;
+    --bg2:       #161b27;
+    --bg3:       #1c2336;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.13);
+    --text:      #e8eaf0;
+    --text2:     #8b92a8;
+    --text3:     #5a6070;
+    --blue:      #3b82f6;
+    --blue-dim:  rgba(59,130,246,0.15);
+    --green:     #22c55e;
+    --green-dim: rgba(34,197,94,0.12);
+    --amber:     #f59e0b;
+    --amber-dim: rgba(245,158,11,0.12);
+    --red:       #ef4444;
+    --red-dim:   rgba(239,68,68,0.12);
+    --purple:    #a78bfa;
+    --radius:    10px;
+    --radius-lg: 14px;
+    --sidebar:   220px;
+    --font:      'Inter', system-ui, sans-serif;
+    --mono:      'IBM Plex Mono', monospace;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+
+  /* LAYOUT */
+  .layout { display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 20px 0;
+  }
+  .sidebar-logo {
+    padding: 0 18px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .sidebar-logo .logo-mark {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--blue);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 16px;
+  }
+  .logo-text { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+  .logo-text span { color: var(--blue); }
+  .logo-sub { font-size: 10px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.5px; margin-top: 2px; }
+
+  .nav-section { padding: 0 10px; margin-bottom: 6px; }
+  .nav-label { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; padding: 0 8px 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 13px;
+    transition: all 0.15s;
+    margin-bottom: 1px;
+    border: 1px solid transparent;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.2); }
+  .nav-item i { font-size: 17px; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .version-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    display: inline-block;
+  }
+  .sidebar-user {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #a78bfa);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: #fff;
+    flex-shrink: 0;
+  }
+  .user-name { font-size: 12px; font-weight: 500; }
+  .user-role { font-size: 10px; color: var(--text3); }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    height: 54px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .topbar-title { font-size: 15px; font-weight: 500; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .topbar-chip {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--text2);
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 10px;
+  }
+  .dot-live { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* KPI ROW */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .kpi-card.blue::before  { background: var(--blue); }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.amber::before { background: var(--amber); }
+  .kpi-card.red::before   { background: var(--red); }
+  .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi-value { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; font-family: var(--mono); }
+  .kpi-delta {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; margin-top: 6px; border-radius: 5px;
+    padding: 2px 7px; font-family: var(--mono);
+  }
+  .kpi-delta.up   { background: var(--red-dim);   color: var(--red); }
+  .kpi-delta.down { background: var(--green-dim); color: var(--green); }
+  .kpi-delta.warn { background: var(--amber-dim); color: var(--amber); }
+
+  /* CHART GRID */
+  .chart-row { display: grid; gap: 12px; margin-bottom: 12px; }
+  .col-2 { grid-template-columns: 1fr 1fr; }
+  .col-3-2 { grid-template-columns: 3fr 2fr; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+  }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .card-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .chart-wrap { position: relative; width: 100%; }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+  .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+  .leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .leg-line { width: 14px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+  .leg-dash { width: 14px; height: 0; border-top: 2px dashed; flex-shrink: 0; }
+
+  /* FILTER ROW */
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .filter-row label { font-size: 11px; color: var(--text3); }
+  .filter-row select {
+    font-size: 12px; padding: 5px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border2);
+    background: var(--bg3); color: var(--text);
+    cursor: pointer; outline: none; font-family: var(--font);
+  }
+  .filter-row select:focus { border-color: var(--blue); }
+
+  /* ALERT */
+  .alert {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px; color: var(--amber);
+    margin-bottom: 14px;
+  }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
+  thead th {
+    text-align: left; padding: 8px 12px;
+    font-size: 10px; font-weight: 500; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .hosp-name { font-weight: 500; color: var(--text); }
+  .hosp-city { font-size: 11px; color: var(--text3); }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; letter-spacing: 0.2px; }
+  .badge-red    { background: var(--red-dim);   color: var(--red); }
+  .badge-amber  { background: var(--amber-dim); color: var(--amber); }
+  .badge-green  { background: var(--green-dim); color: var(--green); }
+  .badge-blue   { background: var(--blue-dim);  color: var(--blue); }
+  .badge-purple { background: rgba(167,139,250,0.12); color: var(--purple); }
+
+  /* OCCUPANCY BAR */
+  .occ-wrap { display: flex; align-items: center; gap: 8px; }
+  .occ-bar { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .occ-fill { height: 100%; border-radius: 3px; }
+  .occ-val { font-family: var(--mono); font-size: 11px; font-weight: 500; width: 32px; text-align: right; }
+
+  /* REGION BAR */
+  .reg-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; }
+  .reg-name { width: 90px; color: var(--text2); text-align: right; flex-shrink: 0; font-size: 11px; }
+  .reg-bar-bg { flex: 1; height: 20px; background: var(--bg3); border-radius: 5px; overflow: hidden; }
+  .reg-bar-fill { height: 100%; border-radius: 5px; display: flex; align-items: center; padding: 0 8px; }
+  .reg-bar-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85); font-family: var(--mono); }
+
+  /* AI INTERFACE */
+  .ai-header {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .ai-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--blue-dim); border: 1px solid rgba(59,130,246,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--blue); font-size: 18px;
+  }
+  .ai-title { font-size: 14px; font-weight: 500; }
+  .ai-desc  { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+  .ai-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .ai-input {
+    flex: 1; padding: 10px 14px;
+    background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: var(--radius); color: var(--text);
+    font-size: 13px; font-family: var(--font); outline: none;
+    transition: border-color 0.15s;
+  }
+  .ai-input:focus { border-color: var(--blue); }
+  .ai-input::placeholder { color: var(--text3); }
+  .ai-btn {
+    padding: 10px 18px;
+    background: var(--blue); border: none;
+    border-radius: var(--radius); color: #fff;
+    font-size: 13px; font-family: var(--font);
+    cursor: pointer; display: flex; align-items: center; gap: 6px;
+    white-space: nowrap; transition: background 0.15s;
+  }
+  .ai-btn:hover { background: #2563eb; }
+  .ai-examples-label { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
+  .ai-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .ai-chip {
+    padding: 5px 12px;
+    border: 1px solid var(--border2);
+    border-radius: 20px; font-size: 11px; color: var(--text2);
+    cursor: pointer; background: var(--bg3);
+    transition: all 0.15s;
+  }
+  .ai-chip:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+
+  .ai-response {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+    min-height: 80px;
+  }
+  .ai-placeholder { font-size: 12px; color: var(--text3); font-style: italic; }
+  .ai-thinking { display: flex; align-items: center; gap: 8px; color: var(--text2); font-size: 12px; }
+  .dots span {
+    display: inline-block; width: 5px; height: 5px;
+    border-radius: 50%; background: var(--blue); margin: 0 2px;
+    animation: bounce 1.2s infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+  .ai-answer { font-size: 13px; line-height: 1.75; color: var(--text); }
+  .ai-answer strong { font-weight: 500; color: var(--text); }
+  .ai-answer .source { font-size: 10px; color: var(--text3); font-family: var(--mono); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+  /* SECTION HEADER */
+  .section-head { margin-bottom: 16px; }
+  .section-head h2 { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; }
+  .section-head p { font-size: 12px; color: var(--text3); margin-top: 3px; }
+
+  /* PROC TABLE badge-type */
+  .type-clinico  { background: var(--blue-dim);  color: #60a5fa; }
+  .type-obstetrico { background: var(--green-dim); color: #4ade80; }
+  .type-cirurgico  { background: rgba(167,139,250,0.12); color: var(--purple); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: repeat(2,1fr); }
+    .col-2, .col-3-2 { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon"><i class="ti ti-heartbeat"></i></div>
+        <div>
+          <div class="logo-text">Saúde<span>BI</span></div>
+          <div class="logo-sub">DATASUS / SIH-SUS</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Dashboards</div>
+      <div class="nav-item active" onclick="showScreen('s1')" id="nav-s1">
+        <i class="ti ti-layout-dashboard"></i> Visão Geral
+      </div>
+      <div class="nav-item" onclick="showScreen('s2')" id="nav-s2">
+        <i class="ti ti-building-hospital"></i> Capacidade Hospitalar
+      </div>
+      <div class="nav-item" onclick="showScreen('s3')" id="nav-s3">
+        <i class="ti ti-stethoscope"></i> Análise de Atendimento
+      </div>
+    </div>
+
+    <div class="nav-section" style="margin-top:8px;">
+      <div class="nav-label">Ferramentas</div>
+      <div class="nav-item" onclick="showScreen('s4')" id="nav-s4">
+        <i class="ti ti-message-bolt"></i> Oracle Select AI
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="version-badge">v1.0.0 — Jun 2025</div>
+      <div class="sidebar-user">
+        <div class="user-avatar">GS</div>
+        <div>
+          <div class="user-name">Gestor de Saúde</div>
+          <div class="user-role">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard — Visão Geral</div>
+      <div class="topbar-right">
+        <div class="topbar-chip"><div class="dot-live"></div> Atualizado agora</div>
+        <div class="topbar-chip"><i class="ti ti-calendar" style="font-size:13px;"></i> Jan–Dez 2024</div>
+        <div class="topbar-chip"><i class="ti ti-database" style="font-size:13px;"></i> SIH-SUS</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- S1: VISÃO GERAL -->
+      <div class="screen active" id="s1">
+        <div class="section-head">
+          <h2>Panorama nacional de saúde</h2>
+          <p>Indicadores-chave de desempenho — todas as regiões do Brasil, 2024</p>
+        </div>
+
+        <div class="kpi-row">
+          <div class="kpi-card blue">
+            <div class="kpi-label">Total de internações</div>
+            <div class="kpi-value">1.284.730</div>
+            <div class="kpi-delta up"><i class="ti ti-trending-up" style="font-size:12px;"></i> +8,4% vs. 2023</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label">Média de permanência</div>
+            <div class="kpi-value">5,3 dias</div>
+            <div class="kpi-delta warn"><i class="ti ti-trending-up" style="font-size:12px;"></i> +0,4 dias vs. 2023</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Leitos disponíveis</div>
+            <div class="kpi-value">48.210</div>
+            <div class="kpi-delta down"><i class="ti ti-trending-down" style="font-size:12px;"></i> -3,1% vs. 2023</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label">Taxa de ocupação</div>
+            <div class="kpi-value">74,6%</div>
+            <div class="kpi-delta up"><i class="ti ti-alert-triangle" style="font-size:12px;"></i> Acima da meta (70%)</div>
+          </div>
+        </div>
+
+        <div class="chart-row" style="grid-template-columns:1fr 1fr;margin-bottom:12px;">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Tendência de internações mensais</div>
+                <div class="card-sub">Em milhares — Jan a Dez</div>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="leg"><div class="leg-line" style="background:#3b82f6;"></div> 2024</div>
+              <div class="leg"><div class="leg-dash" style="border-color:#5a6070;"></div> 2023</div>
+            </div>
+            <div class="chart-wrap" style="height:220px;"><canvas id="trendChart" role="img" aria-label="Gráfico de linha: tendência mensal de internações 2024 vs 2023">Internações mensais: 2024 média 107 mil; 2023 média 98 mil.</canvas></div>
+          </div>
+
+          <!-- MAPA COROPLÉTICO DO BRASIL -->
+          <div class="card" style="position:relative;">
+            <div class="card-head" style="margin-bottom:6px;">
+              <div>
+                <div class="card-title">Taxa de ocupação de leitos por estado</div>
+                <div class="card-sub">Passe o mouse sobre o estado para detalhes</div>
+              </div>
+              <select id="mapMetric" style="font-size:11px;padding:4px 8px;border-radius:7px;border:1px solid rgba(255,255,255,0.13);background:#1c2336;color:#e8eaf0;cursor:pointer;">
+                <option value="ocupacao">Taxa de ocupação</option>
+                <option value="internacoes">Total de internações</option>
+                <option value="crescimento">Crescimento anual</option>
+              </select>
+            </div>
+            <!-- Legenda de escala -->
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:10px;color:#5a6070;">
+              <span>Baixo</span>
+              <div id="mapLegendBar" style="flex:1;height:6px;border-radius:3px;background:linear-gradient(to right,#1e3a5f,#3b82f6,#f59e0b,#ef4444);"></div>
+              <span>Alto</span>
+            </div>
+            <!-- SVG do Brasil -->
+            <div style="position:relative;">
+              <svg id="brazilMap" viewBox="0 0 500 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;" role="img" aria-label="Mapa coroplético do Brasil com taxa de ocupação de leitos por estado">
+                <title>Mapa do Brasil — taxa de ocupação hospitalar por estado (2024)</title>
+                <!-- NORTE -->
+                <path id="AM" d="M72,68 L68,52 L74,38 L90,28 L112,22 L134,18 L156,20 L170,30 L178,46 L180,62 L172,80 L162,96 L148,108 L136,118 L120,122 L106,118 L94,108 L82,96 Z" class="br-state" data-uf="AM" data-nome="Amazonas"/>
+                <path id="PA" d="M178,46 L192,34 L210,26 L230,22 L252,24 L268,34 L278,50 L282,66 L276,82 L264,96 L248,108 L232,116 L216,118 L200,112 L186,100 L178,86 L172,80 L180,62 Z" class="br-state" data-uf="PA" data-nome="Pará"/>
+                <path id="RR" d="M74,38 L68,22 L72,8 L86,2 L102,4 L114,12 L118,26 L112,38 L100,44 L86,44 Z" class="br-state" data-uf="RR" data-nome="Roraima"/>
+                <path id="AP" d="M262,8 L274,2 L288,4 L296,14 L294,26 L282,32 L268,34 L256,26 L252,14 Z" class="br-state" data-uf="AP" data-nome="Amapá"/>
+                <path id="AC" d="M40,118 L34,104 L38,90 L52,84 L68,84 L80,90 L82,104 L76,116 L62,122 L48,122 Z" class="br-state" data-uf="AC" data-nome="Acre"/>
+                <path id="RO" d="M82,104 L80,90 L86,78 L100,72 L116,74 L128,84 L130,98 L122,110 L108,116 L94,112 Z" class="br-state" data-uf="RO" data-nome="Rondônia"/>
+                <path id="TO" d="M248,108 L244,124 L238,140 L230,156 L222,168 L214,176 L202,176 L190,168 L184,154 L186,138 L192,124 L200,112 L216,118 L232,116 Z" class="br-state" data-uf="TO" data-nome="Tocantins"/>
+
+                <!-- NORDESTE -->
+                <path id="MA" d="M278,50 L294,42 L310,38 L326,40 L338,50 L340,64 L332,78 L318,88 L302,92 L286,86 L276,74 L276,58 Z" class="br-state" data-uf="MA" data-nome="Maranhão"/>
+                <path id="PI" d="M338,50 L352,46 L366,50 L374,62 L372,76 L360,88 L346,92 L332,88 L320,80 L318,66 L326,54 Z" class="br-state" data-uf="PI" data-nome="Piauí"/>
+                <path id="CE" d="M366,50 L380,44 L394,46 L402,56 L400,70 L390,80 L376,82 L364,76 L358,64 Z" class="br-state" data-uf="CE" data-nome="Ceará"/>
+                <path id="RN" d="M394,46 L408,44 L418,50 L416,62 L406,68 L394,66 L388,56 Z" class="br-state" data-uf="RN" data-nome="Rio Grande do Norte"/>
+                <path id="PB" d="M400,70 L412,66 L424,68 L426,78 L416,84 L402,82 L396,76 Z" class="br-state" data-uf="PB" data-nome="Paraíba"/>
+                <path id="PE" d="M372,82 L386,80 L400,82 L416,84 L420,94 L408,102 L392,104 L376,100 L364,92 L362,84 Z" class="br-state" data-uf="PE" data-nome="Pernambuco"/>
+                <path id="AL" d="M408,102 L420,100 L428,108 L424,118 L412,120 L402,114 L400,104 Z" class="br-state" data-uf="AL" data-nome="Alagoas"/>
+                <path id="SE" d="M412,120 L424,118 L432,126 L428,136 L416,138 L406,130 L406,120 Z" class="br-state" data-uf="SE" data-nome="Sergipe"/>
+                <path id="BA" d="M346,92 L360,88 L372,82 L376,100 L392,104 L408,102 L412,120 L416,138 L414,154 L408,170 L396,182 L380,190 L360,194 L340,190 L322,180 L308,166 L298,150 L294,134 L298,118 L308,104 L318,96 L332,92 Z" class="br-state" data-uf="BA" data-nome="Bahia"/>
+
+                <!-- CENTRO-OESTE -->
+                <path id="MT" d="M120,122 L136,118 L148,108 L162,96 L172,80 L186,80 L200,84 L210,96 L214,112 L214,128 L208,144 L198,158 L184,166 L168,168 L152,162 L138,150 L128,136 L122,122 Z" class="br-state" data-uf="MT" data-nome="Mato Grosso"/>
+                <path id="GO" d="M214,128 L222,116 L236,110 L250,112 L262,122 L268,136 L264,152 L254,164 L240,172 L224,172 L210,162 L202,148 L202,134 Z" class="br-state" data-uf="GO" data-nome="Goiás"/>
+                <path id="MS" d="M168,192 L168,176 L176,162 L190,154 L206,152 L218,160 L224,174 L222,190 L212,202 L196,208 L178,206 Z" class="br-state" data-uf="MS" data-nome="Mato Grosso do Sul"/>
+                <path id="DF" d="M245,152 L252,148 L258,154 L254,162 L246,164 L242,156 Z" class="br-state" data-uf="DF" data-nome="Distrito Federal"/>
+
+                <!-- SUDESTE -->
+                <path id="MG" d="M262,122 L276,116 L292,114 L308,118 L320,128 L326,142 L322,158 L310,170 L294,176 L276,178 L258,172 L244,162 L238,148 L242,134 Z" class="br-state" data-uf="MG" data-nome="Minas Gerais"/>
+                <path id="ES" d="M322,158 L334,154 L342,162 L340,176 L328,180 L316,174 L312,162 Z" class="br-state" data-uf="ES" data-nome="Espírito Santo"/>
+                <path id="RJ" d="M310,178 L322,174 L334,176 L340,186 L332,194 L318,196 L308,188 Z" class="br-state" data-uf="RJ" data-nome="Rio de Janeiro"/>
+                <path id="SP" d="M258,174 L276,178 L294,176 L310,178 L316,190 L312,206 L298,214 L280,216 L262,210 L248,200 L244,186 L250,176 Z" class="br-state" data-uf="SP" data-nome="São Paulo"/>
+
+                <!-- SUL -->
+                <path id="PR" d="M222,208 L240,202 L258,200 L274,206 L284,218 L280,232 L266,240 L248,242 L230,236 L218,224 Z" class="br-state" data-uf="PR" data-nome="Paraná"/>
+                <path id="SC" d="M230,236 L248,242 L264,242 L274,252 L268,264 L252,268 L234,264 L222,252 L220,240 Z" class="br-state" data-uf="SC" data-nome="Santa Catarina"/>
+                <path id="RS" d="M222,264 L234,264 L252,268 L266,266 L278,276 L280,292 L272,308 L256,318 L236,320 L216,312 L202,298 L198,280 L206,266 Z" class="br-state" data-uf="RS" data-nome="Rio Grande do Sul"/>
+              </svg>
+
+              <!-- Tooltip -->
+              <div id="mapTooltip" style="display:none;position:absolute;background:#1c2336;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;pointer-events:none;z-index:10;min-width:150px;">
+                <div id="ttTitle" style="font-size:12px;font-weight:500;color:#e8eaf0;margin-bottom:4px;"></div>
+                <div id="ttValue" style="font-size:13px;font-weight:600;font-family:'IBM Plex Mono',monospace;"></div>
+                <div id="ttSub" style="font-size:10px;color:#5a6070;margin-top:2px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Leitos: ocupados vs. disponíveis por região</div>
+              <div class="card-sub">Total de leitos hospitalares — 2024</div>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="leg"><div class="leg-dot" style="background:#3b82f6;"></div> Ocupados</div>
+            <div class="leg"><div class="leg-dot" style="background:#1e3a5f;"></div> Disponíveis</div>
+          </div>
+          <div class="chart-wrap" style="height:200px;"><canvas id="bedChart" role="img" aria-label="Barras agrupadas de leitos por região">Leitos: Sudeste 18k ocupados / 5.8k disponíveis; Nordeste 12k / 3.9k.</canvas></div>
+        </div>
+      </div>
+
+      <!-- S2: CAPACIDADE -->
+      <div class="screen" id="s2">
+        <div class="section-head">
+          <h2>Capacidade hospitalar</h2>
+          <p>Ocupação de leitos, tempo de permanência e alertas por estabelecimento</p>
+        </div>
+
+        <div class="alert"><i class="ti ti-alert-triangle"></i> <strong>3 hospitais</strong> com ocupação acima de 90% — acionamento de regulação recomendado.</div>
+
+        <div class="filter-row">
+          <label>Tipo:</label>
+          <select><option>Todos os tipos</option><option>Hospital</option><option>UBS</option><option>UPA</option></select>
+          <label>Região:</label>
+          <select><option>Brasil</option><option>Sudeste</option><option>Nordeste</option><option>Sul</option><option>Norte</option><option>Centro-Oeste</option></select>
+          <label>Período:</label>
+          <select><option>2024</option><option>2023</option><option>Últimos 12 meses</option></select>
+        </div>
+
+        <div class="card" style="margin-bottom:12px;">
+          <div class="card-title" style="margin-bottom:14px;">Estabelecimentos — métricas de ocupação</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Estabelecimento</th>
+                  <th>Município</th>
+                  <th>Região</th>
+                  <th>Internações</th>
+                  <th>Perm. média</th>
+                  <th>Ocupação</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="hosp-name">Hospital das Clínicas SP</div><div class="hosp-city">Público estadual</div></td>
+                  <td>São Paulo</td><td>Sudeste</td><td>42.810</td><td>6,2 dias</td>
+                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:93%;background:#ef4444;"></div></div><div class="occ-val" style="color:#ef4444;">93%</div></div></td>
+                  <td><span class="badge badge-red">Crítico</span></td>
+                </tr>
+                <tr>
+                  <td><div class="hosp-name">Santa Casa Porto Alegre</div><div class="hosp-city">Filantrópico</div></td>
+                  <td>Porto Alegre</td><td>Sul</td><td>19.800</td><td>4,9 dias</td>
+                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:92%;background:#ef4444;"></div></div><div class="occ-val" style="color:#ef4444;">92%</div></div></td>
+                  <td><span class="badge badge-red">Crítico</span></td>
+                </tr>
+                <tr>
+                  <td><div class="hosp-name">Hospital Geral de BH</div><div class="hosp-city">Público municipal</div></td>
+                  <td>Belo Horizonte</td><td>Sudeste</td><td>31.200</td><td>5,8 dias</td>
+                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:91%;background:#ef4444;"></div></div><div class="occ-val" style="color:#ef4444;">91%</div></div></td>
+                  <td><span class="badge badge-red">Crítico</span></td>
+                </tr>
+                <tr>
+                  <td><div class="hosp-name">Hosp. Univ. Federal RJ</div><div class="hosp-city">Público federal</div></td>
+                  <td>Rio de Janeiro</td><td>Sudeste</td><td>27.560</td><td>7,1 dias</td>
+                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:82%;background:#f59e0b;"></div></div><div class="occ-val" style="color:#f59e0b;">82%</div></div></td>
+                  <td><span class="badge badge-amber">Atenção</span></td>
+                </tr>
+                <tr>
+                  <td><div class="hosp-name">Hospital Regional NE</div><div class="hosp-city">Público estadual</div></td>
+                  <td>Fortaleza</td><td>Nordeste</td><td>24.100</td><td>5,3 dias</td>
+                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:77%;background:#f59e0b;"></div></div><div class="occ-val" style="color:#f59e0b;">77%</div></div></td>
+                  <td><span class="badge badge-amber">Atenção</span></td>
+                </tr>
+                <tr>
+                  <td><div class="hosp-name">Hospital Albert Einstein</div><div class="hosp-city">Privado</div></td>
+                  <td>São Paulo</td><td>Sudeste</td><td>18.340</td><td>4,1 dias</td>
+                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:68%;background:#22c55e;"></div></div><div class="occ-val" style="color:#22c55e;">68%</div></div></td>
+                  <td><span class="badge badge-green">Normal</span></td>
+                </tr>
+                <tr>
+                  <td><div class="hosp-name">UPA Recife Centro</div><div class="hosp-city">Público municipal</div></td>
+                  <td>Recife</td><td>Nordeste</td><td>11.400</td><td>1,8 dias</td>
+                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:58%;background:#22c55e;"></div></div><div class="occ-val" style="color:#22c55e;">58%</div></div></td>
+                  <td><span class="badge badge-green">Normal</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Dispersão: internações × ocupação por hospital</div>
+              <div class="card-sub">Cor indica nível de alerta — tamanho proporcional à permanência média</div>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:240px;"><canvas id="scatterChart" role="img" aria-label="Dispersão de hospitais por internações e ocupação">HC-SP e BH com alta internação e ocupação crítica acima de 90%.</canvas></div>
+        </div>
+      </div>
+
+      <!-- S3: ATENDIMENTO -->
+      <div class="screen" id="s3">
+        <div class="section-head">
+          <h2>Análise de atendimento</h2>
+          <p>Tipos de internação e pressão sobre o sistema — 2024</p>
+        </div>
+
+        <div class="filter-row">
+          <label>CID:</label>
+          <select><option>Todos os grupos</option><option>Circulatórias (I)</option><option>Neoplasias (C)</option><option>Gravidez/Parto (O)</option><option>Respiratórias (J)</option></select>
+          <label>Período:</label>
+          <select><option>Últimos 12 meses</option><option>2024</option><option>2023</option></select>
+        </div>
+
+        <div class="chart-row col-2">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Distribuição por tipo de atendimento</div>
+                <div class="card-sub">Participação percentual — 2024</div>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="leg"><div class="leg-dot" style="background:#3b82f6;"></div> Clínico 38%</div>
+              <div class="leg"><div class="leg-dot" style="background:#a78bfa;"></div> Cirúrgico 29%</div>
+              <div class="leg"><div class="leg-dot" style="background:#22c55e;"></div> Obstétrico 18%</div>
+              <div class="leg"><div class="leg-dot" style="background:#f59e0b;"></div> Psiquiátrico 9%</div>
+              <div class="leg"><div class="leg-dot" style="background:#ef4444;"></div> Outros 6%</div>
+            </div>
+            <div class="chart-wrap" style="height:210px;"><canvas id="pieChart" role="img" aria-label="Donut: tipos de internação">Clínico 38%, cirúrgico 29%, obstétrico 18%, psiquiátrico 9%, outros 6%.</canvas></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Crescimento por tipo (24 meses)</div>
+                <div class="card-sub">Índice base 100 = Jan 2023</div>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="leg"><div class="leg-line" style="background:#3b82f6;"></div> Clínico</div>
+              <div class="leg"><div class="leg-line" style="background:#a78bfa;"></div> Cirúrgico</div>
+              <div class="leg"><div class="leg-dash" style="border-color:#22c55e;"></div> Obstétrico</div>
+            </div>
+            <div class="chart-wrap" style="height:210px;"><canvas id="growthChart" role="img" aria-label="Linha de crescimento por tipo de atendimento">Clínico +12%, cirúrgico +9%, obstétrico estável nos últimos 24 meses.</canvas></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px;">Top procedimentos — volume e variação (2024)</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Procedimento / CID</th><th>Tipo</th><th>Internações</th><th>Variação anual</th><th>Perm. média</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Parto normal (O80)</td><td><span class="badge type-obstetrico">Obstétrico</span></td><td>198.440</td><td style="color:#ef4444;font-family:var(--mono);">+11,2%</td><td>2,1 dias</td></tr>
+                <tr><td>Pneumonia (J18)</td><td><span class="badge type-clinico">Clínico</span></td><td>142.800</td><td style="color:#ef4444;font-family:var(--mono);">+15,7%</td><td>7,4 dias</td></tr>
+                <tr><td>Insuf. cardíaca (I50)</td><td><span class="badge type-clinico">Clínico</span></td><td>98.200</td><td style="color:#ef4444;font-family:var(--mono);">+9,3%</td><td>8,1 dias</td></tr>
+                <tr><td>Apendicectomia (K37)</td><td><span class="badge type-cirurgico">Cirúrgico</span></td><td>76.100</td><td style="color:#22c55e;font-family:var(--mono);">-2,1%</td><td>3,2 dias</td></tr>
+                <tr><td>AVC isquêmico (I63)</td><td><span class="badge type-clinico">Clínico</span></td><td>68.900</td><td style="color:#ef4444;font-family:var(--mono);">+18,4%</td><td>11,3 dias</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: SELECT AI -->
+      <div class="screen" id="s4">
+        <div class="section-head">
+          <h2>Oracle Select AI</h2>
+          <p>Consulte os dados em linguagem natural — respostas geradas automaticamente</p>
+        </div>
+
+        <div class="card" style="margin-bottom:12px;">
+          <div class="ai-header">
+            <div class="ai-icon"><i class="ti ti-message-bolt"></i></div>
+            <div>
+              <div class="ai-title">Assistente de análise — SIH-SUS / DATASUS</div>
+              <div class="ai-desc">Powered by Oracle Select AI + HeatWave GenAI</div>
+            </div>
+          </div>
+
+          <div class="ai-input-row">
+            <input class="ai-input" type="text" id="aiInput" placeholder="Ex: Qual região teve maior crescimento de internações nos últimos 12 meses?" />
+            <button class="ai-btn" onclick="runAI()"><i class="ti ti-send" style="font-size:15px;"></i> Consultar</button>
+          </div>
+
+          <div class="ai-examples-label">Exemplos de perguntas</div>
+          <div class="ai-examples">
+            <div class="ai-chip" onclick="fillQ('Qual região teve maior crescimento de internações nos últimos 12 meses?')">Maior crescimento regional</div>
+            <div class="ai-chip" onclick="fillQ('Quais hospitais estão com ocupação acima de 85%?')">Hospitais com alta ocupação</div>
+            <div class="ai-chip" onclick="fillQ('Qual o tipo de atendimento que mais cresceu em 2024?')">Tipo de atendimento em alta</div>
+            <div class="ai-chip" onclick="fillQ('Qual o tempo médio de permanência por região?')">Permanência por região</div>
+            <div class="ai-chip" onclick="fillQ('Compare internações entre Sudeste e Nordeste nos últimos 2 anos.')">Comparativo Sudeste × Nordeste</div>
+            <div class="ai-chip" onclick="fillQ('Quais municípios têm maior pressão sobre leitos hospitalares?')">Pressão sobre leitos</div>
+          </div>
+
+          <div class="ai-response" id="aiResponse">
+            <div class="ai-placeholder">Digite uma pergunta ou selecione um exemplo acima para começar.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Visualização da consulta</div>
+              <div class="card-sub">Gráfico gerado automaticamente com base na resposta</div>
+            </div>
+          </div>
+          <div class="chart-wrap" style="height:240px;"><canvas id="aiChart" role="img" aria-label="Gráfico gerado pelo Select AI">Crescimento por região: Norte 14,2%, Nordeste 11,8%, Centro-Oeste 9,1%, Sudeste 8,4%, Sul 5,2%.</canvas></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /layout -->
+
+<script>
+const titles = {
+  s1: 'Dashboard — Visão Geral',
+  s2: 'Dashboard — Capacidade Hospitalar',
+  s3: 'Dashboard — Análise de Atendimento',
+  s4: 'Oracle Select AI — Consulta em linguagem natural'
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  document.getElementById('topbarTitle').textContent = titles[id];
+}
+
+const TC = 'rgba(255,255,255,0.4)';
+const GC = 'rgba(255,255,255,0.05)';
+const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+const baseOpts = (extra) => ({
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false }, tooltip: { titleFont:{size:11}, bodyFont:{size:11}, backgroundColor:'#1c2336', borderColor:'rgba(255,255,255,0.1)', borderWidth:1 } },
+  scales: { x: { ticks:{color:TC,font:{size:10}}, grid:{color:GC} }, y: { ticks:{color:TC,font:{size:10}}, grid:{color:GC} } },
+  ...extra
+});
+
+new Chart(document.getElementById('trendChart'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      { label:'2024', data:[98,102,108,105,110,118,122,115,109,112,118,121], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.06)', fill:true, tension:0.4, borderWidth:2, pointRadius:2, pointBackgroundColor:'#3b82f6' },
+      { label:'2023', data:[92,95,100,98,101,105,108,103,100,104,108,110], borderColor:'#374151', borderDash:[5,4], fill:false, tension:0.4, borderWidth:1.5, pointRadius:0 }
+    ]
+  },
+  options: baseOpts({})
+});
+
+new Chart(document.getElementById('bedChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Sudeste','Nordeste','Sul','C-Oeste','Norte'],
+    datasets: [
+      { label:'Ocupados',    data:[18200,12100,7300,3500,3100], backgroundColor:'#3b82f6', borderRadius:3 },
+      { label:'Disponíveis', data:[5800,3900,2700,1500,1400],  backgroundColor:'#1e3a5f', borderRadius:3 }
+    ]
+  },
+  options: baseOpts({})
+});
+
+new Chart(document.getElementById('scatterChart'), {
+  type: 'bubble',
+  data: {
+    datasets: [{
+      label:'Hospitais',
+      data:[
+        {x:42810,y:93,r:10},{x:19800,y:92,r:7},
+        {x:31200,y:91,r:9},{x:27560,y:82,r:11},
+        {x:24100,y:77,r:8},{x:18340,y:68,r:6},{x:11400,y:58,r:5}
+      ],
+      backgroundColor:(ctx) => {
+        const v = ctx.raw ? ctx.raw.y : 0;
+        return v>=90 ? 'rgba(239,68,68,0.55)' : v>=80 ? 'rgba(245,158,11,0.55)' : 'rgba(34,197,94,0.55)';
+      },
+      borderColor:(ctx) => {
+        const v = ctx.raw ? ctx.raw.y : 0;
+        return v>=90 ? '#ef4444' : v>=80 ? '#f59e0b' : '#22c55e';
+      },
+      borderWidth:1
+    }]
+  },
+  options: {
+    ...baseOpts({}),
+    scales:{
+      x:{ticks:{color:TC,font:{size:10},callback:v=>(v/1000).toFixed(0)+'k'},grid:{color:GC},min:5000,max:50000,title:{display:true,text:'Internações',color:TC,font:{size:10}}},
+      y:{ticks:{color:TC,font:{size:10},callback:v=>v+'%'},grid:{color:GC},min:45,max:100,title:{display:true,text:'Ocupação %',color:TC,font:{size:10}}}
+    }
+  }
+});
+
+new Chart(document.getElementById('pieChart'), {
+  type: 'doughnut',
+  data: {
+    labels:['Clínico','Cirúrgico','Obstétrico','Psiquiátrico','Outros'],
+    datasets:[{ data:[38,29,18,9,6], backgroundColor:['#3b82f6','#a78bfa','#22c55e','#f59e0b','#ef4444'], borderWidth:0 }]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, cutout:'60%' }
+});
+
+const gLabels = Array.from({length:24},(_,i)=>{ const d=new Date(2023,i); return d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}); });
+new Chart(document.getElementById('growthChart'), {
+  type:'line',
+  data:{
+    labels:gLabels,
+    datasets:[
+      {label:'Clínico',   data:Array.from({length:24},(_,i)=>Math.round(100+i*1.05+Math.sin(i)*1.5)), borderColor:'#3b82f6', borderWidth:2, pointRadius:0, tension:0.4, fill:false},
+      {label:'Cirúrgico', data:Array.from({length:24},(_,i)=>Math.round(100+i*0.82+Math.cos(i)*2)),   borderColor:'#a78bfa', borderWidth:2, pointRadius:0, tension:0.4, fill:false},
+      {label:'Obstétrico',data:Array.from({length:24},(_,i)=>Math.round(100+i*0.22+Math.sin(i*1.3))),  borderColor:'#22c55e', borderDash:[5,4], borderWidth:1.5, pointRadius:0, tension:0.4, fill:false}
+    ]
+  },
+  options:baseOpts({scales:{x:{ticks:{color:TC,font:{size:9},maxTicksLimit:8,maxRotation:0},grid:{color:GC}},y:{ticks:{color:TC,font:{size:10}},grid:{color:GC}}}})
+});
+
+let aiChartInst = new Chart(document.getElementById('aiChart'), {
+  type:'bar',
+  data:{
+    labels:['Norte','Nordeste','C-Oeste','Sudeste','Sul'],
+    datasets:[{label:'Crescimento %',data:[14.2,11.8,9.1,8.4,5.2],backgroundColor:['#3b82f6','#22c55e','#a78bfa','#f59e0b','#ef4444'],borderRadius:4,borderWidth:0}]
+  },
+  options:{...baseOpts({indexAxis:'y'}),scales:{x:{ticks:{color:TC,font:{size:10},callback:v=>v+'%'},grid:{color:GC}},y:{ticks:{color:TC,font:{size:11}},grid:{color:GC}}}}
+});
+
+const aiAnswers = {
+  crescimento:{
+    text:`<strong>Análise de crescimento regional — últimos 12 meses</strong><br><br>A região <strong>Norte</strong> registrou o maior crescimento percentual de internações: <strong>+14,2%</strong>, seguida pelo <strong>Nordeste (+11,8%)</strong> e <strong>Centro-Oeste (+9,1%)</strong>. O Sudeste, apesar do maior volume absoluto, teve crescimento mais moderado: +8,4%. O Sul apresentou o menor crescimento: +5,2%.<div class="source">Fonte: DATASUS / SIH-SUS 2024 — Oracle Select AI</div>`,
+    chart:{labels:['Norte','Nordeste','C-Oeste','Sudeste','Sul'],data:[14.2,11.8,9.1,8.4,5.2],colors:['#3b82f6','#22c55e','#a78bfa','#f59e0b','#ef4444'],axis:'y',suffix:'%'}
+  },
+  ocupacao:{
+    text:`<strong>Hospitais com ocupação acima de 85%</strong><br><br>Foram identificados <strong>3 estabelecimentos em estado crítico</strong>:<br>• <strong>Hospital das Clínicas SP</strong> — 93% (42.810 internações)<br>• <strong>Santa Casa Porto Alegre</strong> — 92% (19.800 internações)<br>• <strong>Hospital Geral de BH</strong> — 91% (31.200 internações)<br><br>Recomenda-se acionamento dos protocolos de regulação de vagas.<div class="source">Fonte: CNES / SIH-SUS — Oracle Select AI</div>`,
+    chart:{labels:['HC-SP','Santa Casa POA','HG-BH','Univ. RJ','HReg. NE'],data:[93,92,91,82,77],colors:['#ef4444','#ef4444','#ef4444','#f59e0b','#f59e0b'],axis:'y',suffix:'%'}
+  },
+  tipo:{
+    text:`<strong>Tipo de atendimento com maior crescimento em 2024</strong><br><br>O grupo <strong>Clínico</strong> liderou o crescimento com <strong>+12,3%</strong>, puxado por pneumonias (+15,7%), insuficiência cardíaca (+9,3%) e AVC isquêmico (+18,4%). <strong>Cirúrgico</strong> cresceu +9,1% e Obstétrico ficou estável em +2,4%.<div class="source">Fonte: SIH-SUS / DATASUS — Oracle Select AI</div>`,
+    chart:{labels:['Clínico','Cirúrgico','Psiquiátrico','Obstétrico','Outros'],data:[12.3,9.1,6.4,2.4,1.8],colors:['#3b82f6','#a78bfa','#f59e0b','#22c55e','#ef4444'],axis:'y',suffix:'%'}
+  },
+  permanencia:{
+    text:`<strong>Permanência média por região — 2024</strong><br><br><strong>Sudeste</strong> apresenta a maior permanência: <strong>6,1 dias</strong>, reflexo do perfil de alta complexidade dos hospitais. A região <strong>Norte</strong> tem 5,8 dias, evidenciando diagnóstico tardio e dificuldade de acesso. O <strong>Sul</strong> tem a menor permanência (4,6 dias), associada à maior eficiência operacional.<div class="source">Fonte: DATASUS SIH 2024 — Oracle Select AI</div>`,
+    chart:{labels:['Sudeste','Norte','Nordeste','C-Oeste','Sul'],data:[6.1,5.8,5.4,5.1,4.6],colors:['#3b82f6','#ef4444','#22c55e','#f59e0b','#a78bfa'],axis:'y',suffix:' dias'}
+  },
+  comparativo:{
+    text:`<strong>Sudeste vs. Nordeste — últimos 2 anos</strong><br><br>O <strong>Sudeste</strong> manteve liderança em volume absoluto (~538 mil internações/ano), mas o <strong>Nordeste</strong> cresceu mais rápido (+11,8% vs +8,4%). A diferença entre as regiões caiu de 196 mil (2023) para 189 mil internações (2024), indicando aproximação gradual.<div class="source">Fonte: SIH-SUS — Oracle Select AI</div>`,
+    chart:{labels:['Q1 23','Q2 23','Q3 23','Q4 23','Q1 24','Q2 24','Q3 24','Q4 24'],data:[130,128,135,133,142,138,144,150],data2:[92,95,98,94,100,104,108,110],axis:'x',suffix:'k'}
+  },
+  municipios:{
+    text:`<strong>Municípios com maior pressão sobre leitos</strong><br><br>Relação internações/leito disponível por mês:<br>• <strong>São Paulo (SP)</strong> — 4,3×<br>• <strong>Belo Horizonte (MG)</strong> — 3,9×<br>• <strong>Manaus (AM)</strong> — 3,7× (atenção: volume médio, mas capacidade baixa)<br>• <strong>Fortaleza (CE)</strong> — 3,4×<br>• <strong>Porto Alegre (RS)</strong> — 3,3×<div class="source">Fonte: CNES / SIH-SUS — Oracle Select AI</div>`,
+    chart:{labels:['São Paulo','Belo Horizonte','Manaus','Fortaleza','Porto Alegre'],data:[4.3,3.9,3.7,3.4,3.3],colors:['#ef4444','#f59e0b','#f59e0b','#3b82f6','#3b82f6'],axis:'y',suffix:'×'}
+  }
+};
+
+function getKey(q) {
+  q = q.toLowerCase();
+  if ((q.includes('crescimento') && q.includes('região')) || q.includes('crescimento regional')) return 'crescimento';
+  if (q.includes('ocupa') && (q.includes('85') || q.includes('hospital'))) return 'ocupacao';
+  if (q.includes('tipo') && (q.includes('cresceu') || q.includes('alta') || q.includes('atendimento'))) return 'tipo';
+  if (q.includes('permanência') || q.includes('permanencia') || q.includes('tempo médio')) return 'permanencia';
+  if (q.includes('compare') || q.includes('compara') || (q.includes('sudeste') && q.includes('nordeste'))) return 'comparativo';
+  if (q.includes('municip') || q.includes('leito')) return 'municipios';
+  return null;
+}
+
+function fillQ(txt) { document.getElementById('aiInput').value = txt; runAI(); }
+
+function runAI() {
+  const q = document.getElementById('aiInput').value.trim();
+  if (!q) return;
+  const resp = document.getElementById('aiResponse');
+  resp.innerHTML = `<div class="ai-thinking"><div class="dots"><span></span><span></span><span></span></div>&nbsp; Consultando base de dados via Oracle Select AI...</div>`;
+  setTimeout(() => {
+    const key = getKey(q);
+    if (key) {
+      resp.innerHTML = `<div class="ai-answer">${aiAnswers[key].text}</div>`;
+      updateAiChart(aiAnswers[key].chart);
+    } else {
+      resp.innerHTML = `<div class="ai-answer">Consulta interpretada, mas sem dados simulados para esta pergunta específica. Tente um dos exemplos pré-definidos ou refine a pergunta com região, período ou tipo de atendimento.<div class="source">Oracle Select AI — SIH-SUS/DATASUS</div></div>`;
+    }
+  }, 1100);
+}
+
+function updateAiChart(cfg) {
+  aiChartInst.destroy();
+  const colors = cfg.colors || ['#3b82f6','#22c55e','#a78bfa','#f59e0b','#ef4444'];
+  const datasets = cfg.data2
+    ? [
+        {label:'Sudeste', data:cfg.data, backgroundColor:'#3b82f6', borderRadius:4, borderWidth:0},
+        {label:'Nordeste',data:cfg.data2,backgroundColor:'#22c55e',borderRadius:4, borderWidth:0}
+      ]
+    : [{label:cfg.suffix, data:cfg.data, backgroundColor:colors, borderRadius:4, borderWidth:0}];
+  aiChartInst = new Chart(document.getElementById('aiChart'), {
+    type:'bar',
+    data:{ labels:cfg.labels, datasets },
+    options:{
+      ...baseOpts({indexAxis:cfg.axis}),
+      scales:{
+        x:{ticks:{color:TC,font:{size:cfg.axis==='y'?11:10},callback:cfg.axis==='x'?v=>v+cfg.suffix:undefined},grid:{color:GC}},
+        y:{ticks:{color:TC,font:{size:cfg.axis==='y'?11:10},callback:cfg.axis==='y'?v=>v+cfg.suffix:undefined},grid:{color:GC}}
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
