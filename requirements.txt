@@ -1,0 +1,9 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+oracledb==2.4.1
+pandas==2.2.2
+pydantic-settings==2.5.2
+python-dotenv==1.0.1
+pysus>=0.11.0
+pytest==8.3.3
+httpx>=0.27.2
