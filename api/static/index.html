@@ -910,81 +910,51 @@ let aiChartInst = new Chart(document.getElementById('aiChart'), {
   options:{...baseOpts({indexAxis:'y'}),scales:{x:{ticks:{color:TC,font:{size:10},callback:v=>v+'%'},grid:{color:GC}},y:{ticks:{color:TC,font:{size:11}},grid:{color:GC}}}}
 });
 
-const aiAnswers = {
-  crescimento:{
-    text:`<strong>Análise de crescimento regional — últimos 12 meses</strong><br><br>A região <strong>Norte</strong> registrou o maior crescimento percentual de internações: <strong>+14,2%</strong>, seguida pelo <strong>Nordeste (+11,8%)</strong> e <strong>Centro-Oeste (+9,1%)</strong>. O Sudeste, apesar do maior volume absoluto, teve crescimento mais moderado: +8,4%. O Sul apresentou o menor crescimento: +5,2%.<div class="source">Fonte: DATASUS / SIH-SUS 2024 — Oracle Select AI</div>`,
-    chart:{labels:['Norte','Nordeste','C-Oeste','Sudeste','Sul'],data:[14.2,11.8,9.1,8.4,5.2],colors:['#3b82f6','#22c55e','#a78bfa','#f59e0b','#ef4444'],axis:'y',suffix:'%'}
-  },
-  ocupacao:{
-    text:`<strong>Hospitais com ocupação acima de 85%</strong><br><br>Foram identificados <strong>3 estabelecimentos em estado crítico</strong>:<br>• <strong>Hospital das Clínicas SP</strong> — 93% (42.810 internações)<br>• <strong>Santa Casa Porto Alegre</strong> — 92% (19.800 internações)<br>• <strong>Hospital Geral de BH</strong> — 91% (31.200 internações)<br><br>Recomenda-se acionamento dos protocolos de regulação de vagas.<div class="source">Fonte: CNES / SIH-SUS — Oracle Select AI</div>`,
-    chart:{labels:['HC-SP','Santa Casa POA','HG-BH','Univ. RJ','HReg. NE'],data:[93,92,91,82,77],colors:['#ef4444','#ef4444','#ef4444','#f59e0b','#f59e0b'],axis:'y',suffix:'%'}
-  },
-  tipo:{
-    text:`<strong>Tipo de atendimento com maior crescimento em 2024</strong><br><br>O grupo <strong>Clínico</strong> liderou o crescimento com <strong>+12,3%</strong>, puxado por pneumonias (+15,7%), insuficiência cardíaca (+9,3%) e AVC isquêmico (+18,4%). <strong>Cirúrgico</strong> cresceu +9,1% e Obstétrico ficou estável em +2,4%.<div class="source">Fonte: SIH-SUS / DATASUS — Oracle Select AI</div>`,
-    chart:{labels:['Clínico','Cirúrgico','Psiquiátrico','Obstétrico','Outros'],data:[12.3,9.1,6.4,2.4,1.8],colors:['#3b82f6','#a78bfa','#f59e0b','#22c55e','#ef4444'],axis:'y',suffix:'%'}
-  },
-  permanencia:{
-    text:`<strong>Permanência média por região — 2024</strong><br><br><strong>Sudeste</strong> apresenta a maior permanência: <strong>6,1 dias</strong>, reflexo do perfil de alta complexidade dos hospitais. A região <strong>Norte</strong> tem 5,8 dias, evidenciando diagnóstico tardio e dificuldade de acesso. O <strong>Sul</strong> tem a menor permanência (4,6 dias), associada à maior eficiência operacional.<div class="source">Fonte: DATASUS SIH 2024 — Oracle Select AI</div>`,
-    chart:{labels:['Sudeste','Norte','Nordeste','C-Oeste','Sul'],data:[6.1,5.8,5.4,5.1,4.6],colors:['#3b82f6','#ef4444','#22c55e','#f59e0b','#a78bfa'],axis:'y',suffix:' dias'}
-  },
-  comparativo:{
-    text:`<strong>Sudeste vs. Nordeste — últimos 2 anos</strong><br><br>O <strong>Sudeste</strong> manteve liderança em volume absoluto (~538 mil internações/ano), mas o <strong>Nordeste</strong> cresceu mais rápido (+11,8% vs +8,4%). A diferença entre as regiões caiu de 196 mil (2023) para 189 mil internações (2024), indicando aproximação gradual.<div class="source">Fonte: SIH-SUS — Oracle Select AI</div>`,
-    chart:{labels:['Q1 23','Q2 23','Q3 23','Q4 23','Q1 24','Q2 24','Q3 24','Q4 24'],data:[130,128,135,133,142,138,144,150],data2:[92,95,98,94,100,104,108,110],axis:'x',suffix:'k'}
-  },
-  municipios:{
-    text:`<strong>Municípios com maior pressão sobre leitos</strong><br><br>Relação internações/leito disponível por mês:<br>• <strong>São Paulo (SP)</strong> — 4,3×<br>• <strong>Belo Horizonte (MG)</strong> — 3,9×<br>• <strong>Manaus (AM)</strong> — 3,7× (atenção: volume médio, mas capacidade baixa)<br>• <strong>Fortaleza (CE)</strong> — 3,4×<br>• <strong>Porto Alegre (RS)</strong> — 3,3×<div class="source">Fonte: CNES / SIH-SUS — Oracle Select AI</div>`,
-    chart:{labels:['São Paulo','Belo Horizonte','Manaus','Fortaleza','Porto Alegre'],data:[4.3,3.9,3.7,3.4,3.3],colors:['#ef4444','#f59e0b','#f59e0b','#3b82f6','#3b82f6'],axis:'y',suffix:'×'}
-  }
-};
-
-function getKey(q) {
-  q = q.toLowerCase();
-  if ((q.includes('crescimento') && q.includes('região')) || q.includes('crescimento regional')) return 'crescimento';
-  if (q.includes('ocupa') && (q.includes('85') || q.includes('hospital'))) return 'ocupacao';
-  if (q.includes('tipo') && (q.includes('cresceu') || q.includes('alta') || q.includes('atendimento'))) return 'tipo';
-  if (q.includes('permanência') || q.includes('permanencia') || q.includes('tempo médio')) return 'permanencia';
-  if (q.includes('compare') || q.includes('compara') || (q.includes('sudeste') && q.includes('nordeste'))) return 'comparativo';
-  if (q.includes('municip') || q.includes('leito')) return 'municipios';
-  return null;
-}
-
 function fillQ(txt) { document.getElementById('aiInput').value = txt; runAI(); }
 
-function runAI() {
+async function runAI() {
   const q = document.getElementById('aiInput').value.trim();
   if (!q) return;
   const resp = document.getElementById('aiResponse');
   resp.innerHTML = `<div class="ai-thinking"><div class="dots"><span></span><span></span><span></span></div>&nbsp; Consultando base de dados via Oracle Select AI...</div>`;
-  setTimeout(() => {
-    const key = getKey(q);
-    if (key) {
-      resp.innerHTML = `<div class="ai-answer">${aiAnswers[key].text}</div>`;
-      updateAiChart(aiAnswers[key].chart);
-    } else {
-      resp.innerHTML = `<div class="ai-answer">Consulta interpretada, mas sem dados simulados para esta pergunta específica. Tente um dos exemplos pré-definidos ou refine a pergunta com região, período ou tipo de atendimento.<div class="source">Oracle Select AI — SIH-SUS/DATASUS</div></div>`;
-    }
-  }, 1100);
+
+  try {
+    const apiResp = await fetch('/api/ai/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pergunta: q }),
+    });
+    if (!apiResp.ok) throw new Error(`HTTP ${apiResp.status}`);
+    const data = await apiResp.json();
+
+    resp.innerHTML = `<div class="ai-answer">${data.resposta}<div class="source">Oracle Select AI — SIH-SUS/DATASUS</div></div>`;
+    atualizarGraficoAI(data.dados);
+  } catch (err) {
+    resp.innerHTML = `<div class="ai-answer">Não foi possível consultar o Select AI agora. Tente novamente em instantes.<div class="source">Erro: ${err.message}</div></div>`;
+  }
 }
 
-function updateAiChart(cfg) {
+function atualizarGraficoAI(dadosJson) {
+  let linhas;
+  try {
+    linhas = JSON.parse(dadosJson);
+  } catch {
+    return; // resposta não tabular — sem gráfico para esta pergunta
+  }
+  if (!Array.isArray(linhas) || linhas.length === 0) return;
+
+  const chaves = Object.keys(linhas[0]);
+  const [chaveLabel, chaveValor] = chaves;
+  if (!chaveLabel || !chaveValor) return; // apenas uma coluna — sem par label/valor para plotar
+
   aiChartInst.destroy();
-  const colors = cfg.colors || ['#3b82f6','#22c55e','#a78bfa','#f59e0b','#ef4444'];
-  const datasets = cfg.data2
-    ? [
-        {label:'Sudeste', data:cfg.data, backgroundColor:'#3b82f6', borderRadius:4, borderWidth:0},
-        {label:'Nordeste',data:cfg.data2,backgroundColor:'#22c55e',borderRadius:4, borderWidth:0}
-      ]
-    : [{label:cfg.suffix, data:cfg.data, backgroundColor:colors, borderRadius:4, borderWidth:0}];
   aiChartInst = new Chart(document.getElementById('aiChart'), {
-    type:'bar',
-    data:{ labels:cfg.labels, datasets },
-    options:{
-      ...baseOpts({indexAxis:cfg.axis}),
-      scales:{
-        x:{ticks:{color:TC,font:{size:cfg.axis==='y'?11:10},callback:cfg.axis==='x'?v=>v+cfg.suffix:undefined},grid:{color:GC}},
-        y:{ticks:{color:TC,font:{size:cfg.axis==='y'?11:10},callback:cfg.axis==='y'?v=>v+cfg.suffix:undefined},grid:{color:GC}}
-      }
-    }
+    type: 'bar',
+    data: {
+      labels: linhas.map(l => l[chaveLabel]),
+      datasets: [{ label: chaveValor, data: linhas.map(l => l[chaveValor]), backgroundColor: '#3b82f6', borderRadius: 4, borderWidth: 0 }],
+    },
+    options: { ...baseOpts({ indexAxis: 'y' }) },
   });
 }
 </script>
