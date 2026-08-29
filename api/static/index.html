@@ -416,22 +416,22 @@
         <div class="kpi-row">
           <div class="kpi-card blue">
             <div class="kpi-label">Total de internações</div>
-            <div class="kpi-value">1.284.730</div>
+            <div class="kpi-value" id="kpiTotalInternacoes">—</div>
             <div class="kpi-delta up"><i class="ti ti-trending-up" style="font-size:12px;"></i> +8,4% vs. 2023</div>
           </div>
           <div class="kpi-card amber">
             <div class="kpi-label">Média de permanência</div>
-            <div class="kpi-value">5,3 dias</div>
+            <div class="kpi-value" id="kpiPermanenciaMedia">—</div>
             <div class="kpi-delta warn"><i class="ti ti-trending-up" style="font-size:12px;"></i> +0,4 dias vs. 2023</div>
           </div>
           <div class="kpi-card green">
             <div class="kpi-label">Leitos disponíveis</div>
-            <div class="kpi-value">48.210</div>
+            <div class="kpi-value" id="kpiLeitosDisponiveis">—</div>
             <div class="kpi-delta down"><i class="ti ti-trending-down" style="font-size:12px;"></i> -3,1% vs. 2023</div>
           </div>
           <div class="kpi-card red">
             <div class="kpi-label">Taxa de ocupação</div>
-            <div class="kpi-value">74,6%</div>
+            <div class="kpi-value" id="kpiTaxaOcupacao">—</div>
             <div class="kpi-delta up"><i class="ti ti-alert-triangle" style="font-size:12px;"></i> Acima da meta (70%)</div>
           </div>
         </div>
@@ -570,50 +570,7 @@
                   <th>Status</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td><div class="hosp-name">Hospital das Clínicas SP</div><div class="hosp-city">Público estadual</div></td>
-                  <td>São Paulo</td><td>Sudeste</td><td>42.810</td><td>6,2 dias</td>
-                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:93%;background:#ef4444;"></div></div><div class="occ-val" style="color:#ef4444;">93%</div></div></td>
-                  <td><span class="badge badge-red">Crítico</span></td>
-                </tr>
-                <tr>
-                  <td><div class="hosp-name">Santa Casa Porto Alegre</div><div class="hosp-city">Filantrópico</div></td>
-                  <td>Porto Alegre</td><td>Sul</td><td>19.800</td><td>4,9 dias</td>
-                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:92%;background:#ef4444;"></div></div><div class="occ-val" style="color:#ef4444;">92%</div></div></td>
-                  <td><span class="badge badge-red">Crítico</span></td>
-                </tr>
-                <tr>
-                  <td><div class="hosp-name">Hospital Geral de BH</div><div class="hosp-city">Público municipal</div></td>
-                  <td>Belo Horizonte</td><td>Sudeste</td><td>31.200</td><td>5,8 dias</td>
-                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:91%;background:#ef4444;"></div></div><div class="occ-val" style="color:#ef4444;">91%</div></div></td>
-                  <td><span class="badge badge-red">Crítico</span></td>
-                </tr>
-                <tr>
-                  <td><div class="hosp-name">Hosp. Univ. Federal RJ</div><div class="hosp-city">Público federal</div></td>
-                  <td>Rio de Janeiro</td><td>Sudeste</td><td>27.560</td><td>7,1 dias</td>
-                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:82%;background:#f59e0b;"></div></div><div class="occ-val" style="color:#f59e0b;">82%</div></div></td>
-                  <td><span class="badge badge-amber">Atenção</span></td>
-                </tr>
-                <tr>
-                  <td><div class="hosp-name">Hospital Regional NE</div><div class="hosp-city">Público estadual</div></td>
-                  <td>Fortaleza</td><td>Nordeste</td><td>24.100</td><td>5,3 dias</td>
-                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:77%;background:#f59e0b;"></div></div><div class="occ-val" style="color:#f59e0b;">77%</div></div></td>
-                  <td><span class="badge badge-amber">Atenção</span></td>
-                </tr>
-                <tr>
-                  <td><div class="hosp-name">Hospital Albert Einstein</div><div class="hosp-city">Privado</div></td>
-                  <td>São Paulo</td><td>Sudeste</td><td>18.340</td><td>4,1 dias</td>
-                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:68%;background:#22c55e;"></div></div><div class="occ-val" style="color:#22c55e;">68%</div></div></td>
-                  <td><span class="badge badge-green">Normal</span></td>
-                </tr>
-                <tr>
-                  <td><div class="hosp-name">UPA Recife Centro</div><div class="hosp-city">Público municipal</div></td>
-                  <td>Recife</td><td>Nordeste</td><td>11.400</td><td>1,8 dias</td>
-                  <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:58%;background:#22c55e;"></div></div><div class="occ-val" style="color:#22c55e;">58%</div></div></td>
-                  <td><span class="badge badge-green">Normal</span></td>
-                </tr>
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
@@ -684,13 +641,7 @@
               <thead>
                 <tr><th>Procedimento / CID</th><th>Tipo</th><th>Internações</th><th>Variação anual</th><th>Perm. média</th></tr>
               </thead>
-              <tbody>
-                <tr><td>Parto normal (O80)</td><td><span class="badge type-obstetrico">Obstétrico</span></td><td>198.440</td><td style="color:#ef4444;font-family:var(--mono);">+11,2%</td><td>2,1 dias</td></tr>
-                <tr><td>Pneumonia (J18)</td><td><span class="badge type-clinico">Clínico</span></td><td>142.800</td><td style="color:#ef4444;font-family:var(--mono);">+15,7%</td><td>7,4 dias</td></tr>
-                <tr><td>Insuf. cardíaca (I50)</td><td><span class="badge type-clinico">Clínico</span></td><td>98.200</td><td style="color:#ef4444;font-family:var(--mono);">+9,3%</td><td>8,1 dias</td></tr>
-                <tr><td>Apendicectomia (K37)</td><td><span class="badge type-cirurgico">Cirúrgico</span></td><td>76.100</td><td style="color:#22c55e;font-family:var(--mono);">-2,1%</td><td>3,2 dias</td></tr>
-                <tr><td>AVC isquêmico (I63)</td><td><span class="badge type-clinico">Clínico</span></td><td>68.900</td><td style="color:#ef4444;font-family:var(--mono);">+18,4%</td><td>11,3 dias</td></tr>
-              </tbody>
+              <tbody></tbody>
             </table>
           </div>
         </div>
@@ -774,29 +725,55 @@ const baseOpts = (extra) => ({
   ...extra
 });
 
-new Chart(document.getElementById('trendChart'), {
-  type: 'line',
-  data: {
-    labels: months,
-    datasets: [
-      { label:'2024', data:[98,102,108,105,110,118,122,115,109,112,118,121], borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,0.06)', fill:true, tension:0.4, borderWidth:2, pointRadius:2, pointBackgroundColor:'#3b82f6' },
-      { label:'2023', data:[92,95,100,98,101,105,108,103,100,104,108,110], borderColor:'#374151', borderDash:[5,4], fill:false, tension:0.4, borderWidth:1.5, pointRadius:0 }
-    ]
-  },
-  options: baseOpts({})
-});
+async function carregarKpis() {
+  const resp = await fetch('/api/kpis?ano=2024');
+  const data = await resp.json();
+  document.getElementById('kpiTotalInternacoes').textContent = data.total_internacoes.toLocaleString('pt-BR');
+  document.getElementById('kpiPermanenciaMedia').textContent = `${data.permanencia_media} dias`;
+  document.getElementById('kpiLeitosDisponiveis').textContent = data.leitos_disponiveis.toLocaleString('pt-BR');
+  document.getElementById('kpiTaxaOcupacao').textContent = `${data.taxa_ocupacao}%`;
+}
 
-new Chart(document.getElementById('bedChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Sudeste','Nordeste','Sul','C-Oeste','Norte'],
-    datasets: [
-      { label:'Ocupados',    data:[18200,12100,7300,3500,3100], backgroundColor:'#3b82f6', borderRadius:3 },
-      { label:'Disponíveis', data:[5800,3900,2700,1500,1400],  backgroundColor:'#1e3a5f', borderRadius:3 }
-    ]
-  },
-  options: baseOpts({})
-});
+async function carregarTendenciaMensal() {
+  const resp = await fetch('/api/tendencia-mensal?ano=2024');
+  const data = await resp.json();
+  const labels = data.map(d => months[d.mes - 1]);
+  const valores = data.map(d => d.total);
+
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: '2024', data: valores, borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.06)', fill: true, tension: 0.4,
+        borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#3b82f6',
+      }],
+    },
+    options: baseOpts({}),
+  });
+}
+
+async function carregarLeitosRegiao() {
+  const resp = await fetch('/api/leitos-regiao?ano=2024');
+  const data = await resp.json();
+
+  new Chart(document.getElementById('bedChart'), {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.regiao),
+      datasets: [
+        { label: 'Ocupados', data: data.map(d => d.ocupados), backgroundColor: '#3b82f6', borderRadius: 3 },
+        { label: 'Disponíveis', data: data.map(d => d.disponiveis), backgroundColor: '#1e3a5f', borderRadius: 3 },
+      ],
+    },
+    options: baseOpts({}),
+  });
+}
+
+carregarKpis();
+carregarTendenciaMensal();
+carregarLeitosRegiao();
 
 new Chart(document.getElementById('scatterChart'), {
   type: 'bubble',
@@ -828,14 +805,74 @@ new Chart(document.getElementById('scatterChart'), {
   }
 });
 
-new Chart(document.getElementById('pieChart'), {
-  type: 'doughnut',
-  data: {
-    labels:['Clínico','Cirúrgico','Obstétrico','Psiquiátrico','Outros'],
-    datasets:[{ data:[38,29,18,9,6], backgroundColor:['#3b82f6','#a78bfa','#22c55e','#f59e0b','#ef4444'], borderWidth:0 }]
-  },
-  options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, cutout:'60%' }
-});
+function corPorStatus(status) {
+  return { critico: '#ef4444', atencao: '#f59e0b', normal: '#22c55e' }[status];
+}
+function badgePorStatus(status) {
+  return { critico: 'badge-red', atencao: 'badge-amber', normal: 'badge-green' }[status];
+}
+function rotuloPorStatus(status) {
+  return { critico: 'Crítico', atencao: 'Atenção', normal: 'Normal' }[status];
+}
+
+async function carregarHospitais() {
+  const resp = await fetch('/api/hospitais?ano=2024');
+  const hospitais = await resp.json();
+  const tbody = document.querySelector('#s2 tbody');
+  tbody.innerHTML = hospitais.map(h => `
+    <tr>
+      <td><div class="hosp-name">${h.nome}</div></td>
+      <td>${h.municipio}</td><td>${h.regiao}</td><td>${h.internacoes.toLocaleString('pt-BR')}</td>
+      <td>${h.permanencia_media} dias</td>
+      <td><div class="occ-wrap"><div class="occ-bar"><div class="occ-fill" style="width:${h.taxa_ocupacao}%;background:${corPorStatus(h.status)};"></div></div>
+      <div class="occ-val" style="color:${corPorStatus(h.status)};">${h.taxa_ocupacao}%</div></div></td>
+      <td><span class="badge ${badgePorStatus(h.status)}">${rotuloPorStatus(h.status)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function corPorOcupacao(taxa) {
+  if (taxa >= 90) return '#ef4444';
+  if (taxa >= 75) return '#f59e0b';
+  return '#3b82f6';
+}
+
+async function carregarOcupacaoEstados() {
+  const resp = await fetch('/api/ocupacao-estados?ano=2024');
+  const estados = await resp.json();
+  estados.forEach(e => {
+    const path = document.getElementById(e.uf);
+    if (path) path.style.fill = corPorOcupacao(e.taxa_ocupacao);
+  });
+}
+
+async function carregarTiposAtendimento() {
+  const resp = await fetch('/api/tipos-atendimento?ano=2024');
+  const data = await resp.json();
+
+  new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: data.distribuicao.map(d => d.tipo),
+      datasets: [{
+        data: data.distribuicao.map(d => d.percentual),
+        backgroundColor: ['#3b82f6', '#a78bfa', '#22c55e', '#f59e0b', '#ef4444'],
+        borderWidth: 0,
+      }],
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '60%' },
+  });
+
+  const tbody = document.querySelector('#s3 tbody');
+  tbody.innerHTML = data.top_procedimentos.map(p => `
+    <tr><td>${p.nome}</td><td><span class="badge type-${p.tipo}">${p.tipo}</span></td>
+    <td>${p.internacoes.toLocaleString('pt-BR')}</td><td>—</td><td>${p.permanencia_media} dias</td></tr>
+  `).join('');
+}
+
+carregarHospitais();
+carregarOcupacaoEstados();
+carregarTiposAtendimento();
 
 const gLabels = Array.from({length:24},(_,i)=>{ const d=new Date(2023,i); return d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}); });
 new Chart(document.getElementById('growthChart'), {
