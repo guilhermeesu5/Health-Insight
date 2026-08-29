@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 
 from api.routers import visao_geral, capacidade, atendimento, ai
 
@@ -12,3 +13,8 @@ app.include_router(ai.router)
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/")
+def home():
+    return FileResponse("api/static/index.html")
