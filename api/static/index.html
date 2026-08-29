@@ -332,6 +332,8 @@
   .type-clinico  { background: var(--blue-dim);  color: #60a5fa; }
   .type-obstetrico { background: var(--green-dim); color: #4ade80; }
   .type-cirurgico  { background: rgba(167,139,250,0.12); color: var(--purple); }
+  .type-outros  { background: var(--red-dim);  color: var(--red); }
+  .type-psiquiatrico { background: var(--amber-dim); color: var(--amber); }
 
   /* SCROLLBAR */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -608,14 +610,8 @@
                 <div class="card-sub">Participação percentual — 2024</div>
               </div>
             </div>
-            <div class="legend">
-              <div class="leg"><div class="leg-dot" style="background:#3b82f6;"></div> Clínico 38%</div>
-              <div class="leg"><div class="leg-dot" style="background:#a78bfa;"></div> Cirúrgico 29%</div>
-              <div class="leg"><div class="leg-dot" style="background:#22c55e;"></div> Obstétrico 18%</div>
-              <div class="leg"><div class="leg-dot" style="background:#f59e0b;"></div> Psiquiátrico 9%</div>
-              <div class="leg"><div class="leg-dot" style="background:#ef4444;"></div> Outros 6%</div>
-            </div>
-            <div class="chart-wrap" style="height:210px;"><canvas id="pieChart" role="img" aria-label="Donut: tipos de internação">Clínico 38%, cirúrgico 29%, obstétrico 18%, psiquiátrico 9%, outros 6%.</canvas></div>
+            <div class="legend" id="tiposLegend"></div>
+            <div class="chart-wrap" style="height:210px;"><canvas id="pieChart" role="img" aria-label="Donut: tipos de internação">Distribuição real por tipo de atendimento, carregada da API.</canvas></div>
           </div>
 
           <div class="card">
@@ -846,6 +842,18 @@ async function carregarOcupacaoEstados() {
   });
 }
 
+const corPorTipoAtendimento = {
+  clinico: '#3b82f6',
+  cirurgico: '#a78bfa',
+  obstetrico: '#22c55e',
+  psiquiatrico: '#f59e0b',
+  outros: '#ef4444',
+};
+
+function rotuloTipoAtendimento(tipo) {
+  return { clinico: 'Clínico', cirurgico: 'Cirúrgico', obstetrico: 'Obstétrico', psiquiatrico: 'Psiquiátrico', outros: 'Outros' }[tipo] || tipo;
+}
+
 async function carregarTiposAtendimento() {
   const resp = await fetch('/api/tipos-atendimento?ano=2024');
   const data = await resp.json();
@@ -856,12 +864,17 @@ async function carregarTiposAtendimento() {
       labels: data.distribuicao.map(d => d.tipo),
       datasets: [{
         data: data.distribuicao.map(d => d.percentual),
-        backgroundColor: ['#3b82f6', '#a78bfa', '#22c55e', '#f59e0b', '#ef4444'],
+        backgroundColor: data.distribuicao.map(d => corPorTipoAtendimento[d.tipo] || '#5a6070'),
         borderWidth: 0,
       }],
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '60%' },
   });
+
+  const legend = document.getElementById('tiposLegend');
+  legend.innerHTML = data.distribuicao.map(d => `
+    <div class="leg"><div class="leg-dot" style="background:${corPorTipoAtendimento[d.tipo] || '#5a6070'};"></div> ${rotuloTipoAtendimento(d.tipo)} ${d.percentual}%</div>
+  `).join('');
 
   const tbody = document.querySelector('#s3 tbody');
   tbody.innerHTML = data.top_procedimentos.map(p => `
