@@ -84,3 +84,14 @@ A carga atual cobre **5 UFs (AC, DF, CE, SC, AM)**, competência
    SIH-SUS para internações de longa permanência. Evoluções futuras
    (mais meses de dados, um modelo de série temporal mais robusto)
    melhorariam a qualidade da previsão.
+6. **Taxa de ocupação acima de 100% em alguns hospitais:** a ocupação é
+   estimada por censo médio diário (dias-paciente ÷ dias do período, com
+   `DIAS_CARGA_ATUAL = 31` em `api/queries/visao_geral.py`, pois só a
+   competência 2024-01 foi carregada). O denominador de leitos vem do
+   CNES, que subnotifica leitos: 44.611 dos 48.328 estabelecimentos
+   carregados têm `leitos_totais` 0 ou nulo, e alguns hospitais com
+   poucos leitos registrados concentram muitos dias-paciente (ex: CNES
+   2480026, 7 leitos e 2.617 dias-paciente em janeiro/2024 → 1.206%).
+   São 12 de 508 hospitais acima de 100%; a mediana fica em 12,7%. Os
+   valores são exibidos como calculados, sem truncamento — corrigir
+   exigiria uma fonte de leitos melhor que o layout público do CNES.

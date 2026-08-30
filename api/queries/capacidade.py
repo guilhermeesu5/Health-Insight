@@ -1,9 +1,18 @@
+from api.queries.visao_geral import DIAS_CARGA_ATUAL
+
+
 def get_ocupacao_estados(conn, ano: int) -> list[dict]:
     cur = conn.cursor()
+
+    # leitos_totais é uma dimensão por estabelecimento: agregá-lo no mesmo
+    # JOIN com internacoes (tabela fato) repetiria o valor uma vez por
+    # internação e inflaria a soma. Agregamos separadamente e combinamos aqui.
+    cur.execute("SELECT uf, SUM(leitos_totais) FROM estabelecimentos GROUP BY uf")
+    leitos_por_uf = {uf: leitos or 0 for uf, leitos in cur.fetchall()}
+
     cur.execute(
         """
-        SELECT e.uf, SUM(e.leitos_totais) AS leitos_totais,
-               SUM(i.dias_permanencia) AS soma_dias, COUNT(i.id) AS internacoes
+        SELECT e.uf, SUM(i.dias_permanencia) AS soma_dias, COUNT(i.id) AS internacoes
         FROM estabelecimentos e
         JOIN internacoes i ON i.estabelecimento_id = e.id
         WHERE EXTRACT(YEAR FROM i.data_internacao) = :ano
@@ -11,10 +20,10 @@ def get_ocupacao_estados(conn, ano: int) -> list[dict]:
         """,
         ano=ano,
     )
-    dias_no_ano = 366 if ano % 4 == 0 else 365
     resultado = []
-    for uf, leitos_totais, soma_dias, internacoes in cur.fetchall():
-        censo_medio = (soma_dias or 0) / dias_no_ano
+    for uf, soma_dias, internacoes in cur.fetchall():
+        leitos_totais = leitos_por_uf.get(uf, 0)
+        censo_medio = (soma_dias or 0) / DIAS_CARGA_ATUAL
         taxa = round((censo_medio / leitos_totais) * 100, 1) if leitos_totais else 0
         resultado.append({"uf": uf, "taxa_ocupacao": taxa, "internacoes": internacoes})
     return resultado
@@ -51,10 +60,9 @@ def get_hospitais(conn, ano: int, regiao: str | None, tipo: str | None) -> list[
         """,
         params,
     )
-    dias_no_ano = 366 if ano % 4 == 0 else 365
     resultado = []
     for nome, municipio, regiao_, leitos_totais, internacoes, permanencia_media, soma_dias in cur.fetchall():
-        censo_medio = (soma_dias or 0) / dias_no_ano
+        censo_medio = (soma_dias or 0) / DIAS_CARGA_ATUAL
         taxa = round((censo_medio / leitos_totais) * 100, 1) if leitos_totais else 0
         resultado.append({
             "nome": nome,

@@ -1,3 +1,10 @@
+# A carga atual do ETL cobre apenas a competência 2024-01 (ver
+# etl/load.py: ANO, MES = 2024, 1) — um único mês de 31 dias — não o
+# ano inteiro. Ajustar esta constante (ou torná-la dependente de mes)
+# se mais competências forem carregadas no futuro.
+DIAS_CARGA_ATUAL = 31
+
+
 def get_kpis(conn, ano: int) -> dict:
     cur = conn.cursor()
     cur.execute(
@@ -16,10 +23,9 @@ def get_kpis(conn, ano: int) -> dict:
     cur.execute("SELECT SUM(leitos_totais) FROM estabelecimentos")
     leitos_totais = cur.fetchone()[0] or 0
 
-    dias_no_ano = 366 if ano % 4 == 0 else 365
     # Censo médio diário = dias-paciente no período / dias de calendário —
     # estimativa padrão de ocupação média a partir de dados de admissão.
-    censo_medio_diario = soma_dias / dias_no_ano
+    censo_medio_diario = soma_dias / DIAS_CARGA_ATUAL
     taxa_ocupacao = round((censo_medio_diario / leitos_totais) * 100, 1) if leitos_totais else 0
     leitos_disponiveis = max(int(leitos_totais - round(censo_medio_diario)), 0)
 
@@ -48,9 +54,16 @@ def get_tendencia_mensal(conn, ano: int) -> list[dict]:
 
 def get_leitos_regiao(conn, ano: int) -> list[dict]:
     cur = conn.cursor()
+
+    # leitos_totais é uma dimensão por estabelecimento: agregá-lo no mesmo
+    # JOIN com internacoes (tabela fato) repetiria o valor uma vez por
+    # internação e inflaria a soma. Agregamos separadamente e combinamos aqui.
+    cur.execute("SELECT regiao, SUM(leitos_totais) FROM estabelecimentos GROUP BY regiao")
+    leitos_por_regiao = {regiao: leitos or 0 for regiao, leitos in cur.fetchall()}
+
     cur.execute(
         """
-        SELECT e.regiao, SUM(e.leitos_totais) AS leitos_totais, SUM(i.dias_permanencia) AS soma_dias
+        SELECT e.regiao, SUM(i.dias_permanencia) AS soma_dias
         FROM estabelecimentos e
         JOIN internacoes i ON i.estabelecimento_id = e.id
         WHERE EXTRACT(YEAR FROM i.data_internacao) = :ano
@@ -58,13 +71,13 @@ def get_leitos_regiao(conn, ano: int) -> list[dict]:
         """,
         ano=ano,
     )
-    dias_no_ano = 366 if ano % 4 == 0 else 365
     resultado = []
-    for regiao, leitos_totais, soma_dias in cur.fetchall():
-        ocupados = round((soma_dias or 0) / dias_no_ano)
+    for regiao, soma_dias in cur.fetchall():
+        ocupados = round((soma_dias or 0) / DIAS_CARGA_ATUAL)
+        leitos_totais = leitos_por_regiao.get(regiao, 0)
         resultado.append({
             "regiao": regiao,
             "ocupados": ocupados,
-            "disponiveis": max(int(leitos_totais or 0) - ocupados, 0),
+            "disponiveis": max(int(leitos_totais) - ocupados, 0),
         })
     return resultado
