@@ -8,7 +8,7 @@ router = APIRouter(prefix="/api/ai", tags=["ai"])
 
 
 class PerguntaIn(BaseModel):
-    pergunta: str = Field(min_length=1)
+    pergunta: str = Field(min_length=1, max_length=300)
 
 
 @router.post("/query")

@@ -584,7 +584,7 @@
               <div class="card-sub">Cor indica nível de alerta — tamanho proporcional à permanência média</div>
             </div>
           </div>
-          <div class="chart-wrap" style="height:240px;"><canvas id="scatterChart" role="img" aria-label="Dispersão de hospitais por internações e ocupação">HC-SP e BH com alta internação e ocupação crítica acima de 90%.</canvas></div>
+          <div class="chart-wrap" style="height:240px;"><canvas id="scatterChart" role="img" aria-label="Dispersão de hospitais por internações e ocupação">Cada bolha é um hospital: eixo X internações, eixo Y taxa de ocupação, tamanho pela permanência média e cor pelo nível de alerta.</canvas></div>
         </div>
       </div>
 
@@ -771,38 +771,8 @@ carregarKpis();
 carregarTendenciaMensal();
 carregarLeitosRegiao();
 
-new Chart(document.getElementById('scatterChart'), {
-  type: 'bubble',
-  data: {
-    datasets: [{
-      label:'Hospitais',
-      data:[
-        {x:42810,y:93,r:10},{x:19800,y:92,r:7},
-        {x:31200,y:91,r:9},{x:27560,y:82,r:11},
-        {x:24100,y:77,r:8},{x:18340,y:68,r:6},{x:11400,y:58,r:5}
-      ],
-      backgroundColor:(ctx) => {
-        const v = ctx.raw ? ctx.raw.y : 0;
-        return v>=90 ? 'rgba(239,68,68,0.55)' : v>=80 ? 'rgba(245,158,11,0.55)' : 'rgba(34,197,94,0.55)';
-      },
-      borderColor:(ctx) => {
-        const v = ctx.raw ? ctx.raw.y : 0;
-        return v>=90 ? '#ef4444' : v>=80 ? '#f59e0b' : '#22c55e';
-      },
-      borderWidth:1
-    }]
-  },
-  options: {
-    ...baseOpts({}),
-    scales:{
-      x:{ticks:{color:TC,font:{size:10},callback:v=>(v/1000).toFixed(0)+'k'},grid:{color:GC},min:5000,max:50000,title:{display:true,text:'Internações',color:TC,font:{size:10}}},
-      y:{ticks:{color:TC,font:{size:10},callback:v=>v+'%'},grid:{color:GC},min:45,max:100,title:{display:true,text:'Ocupação %',color:TC,font:{size:10}}}
-    }
-  }
-});
-
 function corPorStatus(status) {
-  return { critico: '#ef4444', atencao: '#f59e0b', normal: '#22c55e' }[status];
+  return { critico: '#ef4444', atencao: '#f59e0b', normal: '#22c55e' }[status] || '#5a6070';
 }
 function badgePorStatus(status) {
   return { critico: 'badge-red', atencao: 'badge-amber', normal: 'badge-green' }[status];
@@ -811,9 +781,63 @@ function rotuloPorStatus(status) {
   return { critico: 'Crítico', atencao: 'Atenção', normal: 'Normal' }[status];
 }
 
+function corComAlpha(hex, alpha) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
+}
+
+// Raio da bolha proporcional à permanência média (dias), com piso/teto
+// para manter as bolhas legíveis mesmo com outliers.
+function raioPorPermanencia(dias) {
+  return Math.max(4, Math.min(18, 3 + (dias || 0) * 1.5));
+}
+
+function renderScatterHospitais(hospitais) {
+  const pontos = hospitais.map(h => ({
+    x: h.internacoes,
+    y: h.taxa_ocupacao,
+    r: raioPorPermanencia(h.permanencia_media),
+    nome: h.nome,
+    permanencia: h.permanencia_media,
+    status: h.status,
+  }));
+
+  new Chart(document.getElementById('scatterChart'), {
+    type: 'bubble',
+    data: {
+      datasets: [{
+        label: 'Hospitais',
+        data: pontos,
+        backgroundColor: (ctx) => corComAlpha(corPorStatus(ctx.raw && ctx.raw.status), 0.55),
+        borderColor: (ctx) => corPorStatus(ctx.raw && ctx.raw.status),
+        borderWidth: 1,
+      }],
+    },
+    options: {
+      ...baseOpts({}),
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          titleFont: { size: 11 }, bodyFont: { size: 11 },
+          backgroundColor: '#1c2336', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+          callbacks: {
+            title: (items) => items[0].raw.nome,
+            label: (item) => `${item.raw.x.toLocaleString('pt-BR')} internações · ${item.raw.y}% ocupação · ${item.raw.permanencia} dias`,
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: TC, font: { size: 10 }, callback: v => v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v }, grid: { color: GC }, beginAtZero: true, title: { display: true, text: 'Internações', color: TC, font: { size: 10 } } },
+        y: { ticks: { color: TC, font: { size: 10 }, callback: v => v + '%' }, grid: { color: GC }, beginAtZero: true, title: { display: true, text: 'Ocupação %', color: TC, font: { size: 10 } } },
+      },
+    },
+  });
+}
+
 async function carregarHospitais() {
   const resp = await fetch('/api/hospitais?ano=2024');
   const hospitais = await resp.json();
+  renderScatterHospitais(hospitais);
   const tbody = document.querySelector('#s2 tbody');
   tbody.innerHTML = hospitais.map(h => `
     <tr>

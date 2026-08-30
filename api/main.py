@@ -3,7 +3,15 @@ from fastapi.responses import FileResponse
 
 from api.routers import visao_geral, capacidade, atendimento, ai
 
-app = FastAPI(title="HealthInsight API")
+# docs/redoc/openapi desabilitados: a API é servida em IP público e o
+# endpoint /api/ai/query dispara chamadas reais (e cobradas) ao OCI
+# Generative AI — não expomos um console interativo para isso.
+app = FastAPI(
+    title="HealthInsight API",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
 app.include_router(visao_geral.router)
 app.include_router(capacidade.router)
 app.include_router(atendimento.router)
