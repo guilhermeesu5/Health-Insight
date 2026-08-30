@@ -1,0 +1,13 @@
+[Unit]
+Description=HealthInsight FastAPI
+After=network.target
+
+[Service]
+User=opc
+WorkingDirectory=/home/opc/Health-Insight
+EnvironmentFile=/home/opc/Health-Insight/.env
+ExecStart=/home/opc/Health-Insight/.venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
