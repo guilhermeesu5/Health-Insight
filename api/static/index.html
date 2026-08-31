@@ -459,6 +459,12 @@
               <div class="leg"><div class="leg-line" style="background:#3b82f6;"></div> Internações por dia</div>
             </div>
             <div class="chart-wrap" style="height:220px;"><canvas id="trendChart" role="img" aria-label="Gráfico de linha: internações por dia em janeiro de 2024">Evolução diária de internações ao longo de janeiro de 2024, com base nos dados reais carregados.</canvas></div>
+
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+              <div class="card-title" style="margin-bottom:2px;">Internações por dia da semana</div>
+              <div class="card-sub" style="margin-bottom:10px;">Média diária — janeiro/2024</div>
+              <div class="chart-wrap" style="height:150px;"><canvas id="weekdayChart" role="img" aria-label="Gráfico de barras: média de internações por dia da semana">Distribuição da média diária de internações por dia da semana em janeiro de 2024.</canvas></div>
+            </div>
           </div>
 
           <!-- MAPA COROPLÉTICO DO BRASIL -->
@@ -804,6 +810,36 @@ async function carregarTendenciaMensal() {
         label: 'Internações por dia', data: valores, borderColor: '#3b82f6',
         backgroundColor: 'rgba(59,130,246,0.06)', fill: true, tension: 0.4,
         borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#3b82f6',
+      }],
+    },
+    options: baseOpts({}),
+  });
+
+  renderWeekdayChart(data);
+}
+
+function renderWeekdayChart(dadosDiarios) {
+  const nomesDias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const somas = new Array(7).fill(0);
+  const contagens = new Array(7).fill(0);
+
+  dadosDiarios.forEach(d => {
+    const diaSemana = new Date(2024, 0, d.dia).getDay();
+    somas[diaSemana] += d.total;
+    contagens[diaSemana] += 1;
+  });
+
+  const medias = somas.map((soma, i) => contagens[i] ? Math.round(soma / contagens[i]) : 0);
+  const corFimDeSemana = (idx) => (idx === 0 || idx === 6) ? '#f59e0b' : '#3b82f6';
+
+  new Chart(document.getElementById('weekdayChart'), {
+    type: 'bar',
+    data: {
+      labels: nomesDias,
+      datasets: [{
+        data: medias,
+        backgroundColor: nomesDias.map((_, i) => corFimDeSemana(i)),
+        borderRadius: 4,
       }],
     },
     options: baseOpts({}),
