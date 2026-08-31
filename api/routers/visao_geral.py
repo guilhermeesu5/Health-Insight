@@ -16,6 +16,11 @@ def tendencia_mensal(ano: int = 2024, conn=Depends(get_connection)):
     return q.get_tendencia_mensal(conn, ano)
 
 
+@router.get("/tendencia-diaria")
+def tendencia_diaria(ano: int = 2024, mes: int = 1, conn=Depends(get_connection)):
+    return q.get_tendencia_diaria(conn, ano, mes)
+
+
 @router.get("/leitos-regiao")
 def leitos_regiao(ano: int = 2024, conn=Depends(get_connection)):
     return q.get_leitos_regiao(conn, ano)

@@ -335,6 +335,15 @@
   .type-outros  { background: var(--red-dim);  color: var(--red); }
   .type-psiquiatrico { background: var(--amber-dim); color: var(--amber); }
 
+  /* MAPA DO BRASIL */
+  .br-state {
+    fill: var(--bg3);
+    stroke: var(--border2);
+    stroke-width: 1;
+    transition: fill 0.15s;
+  }
+  .br-state:hover { stroke: var(--text2); stroke-width: 1.5; cursor: pointer; }
+
   /* SCROLLBAR */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -442,15 +451,14 @@
           <div class="card">
             <div class="card-head">
               <div>
-                <div class="card-title">Tendência de internações mensais</div>
-                <div class="card-sub">Em milhares — Jan a Dez</div>
+                <div class="card-title">Tendência diária de internações</div>
+                <div class="card-sub">Janeiro/2024 — dados reais carregados</div>
               </div>
             </div>
             <div class="legend">
-              <div class="leg"><div class="leg-line" style="background:#3b82f6;"></div> 2024</div>
-              <div class="leg"><div class="leg-dash" style="border-color:#5a6070;"></div> 2023</div>
+              <div class="leg"><div class="leg-line" style="background:#3b82f6;"></div> Internações por dia</div>
             </div>
-            <div class="chart-wrap" style="height:220px;"><canvas id="trendChart" role="img" aria-label="Gráfico de linha: tendência mensal de internações 2024 vs 2023">Internações mensais: 2024 média 107 mil; 2023 média 98 mil.</canvas></div>
+            <div class="chart-wrap" style="height:220px;"><canvas id="trendChart" role="img" aria-label="Gráfico de linha: internações por dia em janeiro de 2024">Evolução diária de internações ao longo de janeiro de 2024, com base nos dados reais carregados.</canvas></div>
           </div>
 
           <!-- MAPA COROPLÉTICO DO BRASIL -->
@@ -731,9 +739,9 @@ async function carregarKpis() {
 }
 
 async function carregarTendenciaMensal() {
-  const resp = await fetch('/api/tendencia-mensal?ano=2024');
+  const resp = await fetch('/api/tendencia-diaria?ano=2024&mes=1');
   const data = await resp.json();
-  const labels = data.map(d => months[d.mes - 1]);
+  const labels = data.map(d => String(d.dia).padStart(2, '0'));
   const valores = data.map(d => d.total);
 
   new Chart(document.getElementById('trendChart'), {
@@ -741,7 +749,7 @@ async function carregarTendenciaMensal() {
     data: {
       labels,
       datasets: [{
-        label: '2024', data: valores, borderColor: '#3b82f6',
+        label: 'Internações por dia', data: valores, borderColor: '#3b82f6',
         backgroundColor: 'rgba(59,130,246,0.06)', fill: true, tension: 0.4,
         borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#3b82f6',
       }],

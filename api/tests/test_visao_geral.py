@@ -31,6 +31,21 @@ def test_tendencia_mensal_endpoint(client, monkeypatch):
     assert len(resp.json()) == 2
 
 
+def test_tendencia_diaria_endpoint(client, monkeypatch):
+    def fake_get_tendencia_diaria(conn, ano, mes):
+        assert ano == 2024
+        assert mes == 1
+        return [{"dia": 1, "total": 2200}, {"dia": 2, "total": 2350}]
+
+    monkeypatch.setattr(router_module.q, "get_tendencia_diaria", fake_get_tendencia_diaria)
+
+    resp = client.get("/api/tendencia-diaria?ano=2024&mes=1")
+
+    assert resp.status_code == 200
+    assert len(resp.json()) == 2
+    assert resp.json()[0]["dia"] == 1
+
+
 def test_leitos_regiao_endpoint(client, monkeypatch):
     def fake_get_leitos_regiao(conn, ano):
         return [{"regiao": "Sudeste", "ocupados": 18200, "disponiveis": 5800}]

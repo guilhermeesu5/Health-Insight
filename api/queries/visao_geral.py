@@ -52,6 +52,26 @@ def get_tendencia_mensal(conn, ano: int) -> list[dict]:
     return [{"mes": int(mes), "total": total} for mes, total in cur.fetchall()]
 
 
+def get_tendencia_diaria(conn, ano: int, mes: int) -> list[dict]:
+    # A carga atual cobre um único mês (ver DIAS_CARGA_ATUAL acima), então
+    # uma tendência dia-a-dia dentro desse mês é mais honesta com os dados
+    # reais disponíveis do que uma série "mensal" com um ponto só.
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT EXTRACT(DAY FROM data_internacao) AS dia, COUNT(*) AS total
+        FROM internacoes
+        WHERE EXTRACT(YEAR FROM data_internacao) = :ano
+          AND EXTRACT(MONTH FROM data_internacao) = :mes
+        GROUP BY EXTRACT(DAY FROM data_internacao)
+        ORDER BY dia
+        """,
+        ano=ano,
+        mes=mes,
+    )
+    return [{"dia": int(dia), "total": total} for dia, total in cur.fetchall()]
+
+
 def get_leitos_regiao(conn, ano: int) -> list[dict]:
     cur = conn.cursor()
 
