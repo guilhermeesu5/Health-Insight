@@ -68,6 +68,11 @@
   .sidebar.collapsed .nav-section { padding: 0 10px; }
   .sidebar.collapsed .sidebar-user { justify-content: center; }
 
+  .sidebar-toggle-row {
+    padding: 0 10px 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
   .sidebar-toggle {
     background: transparent;
     border: 1px solid var(--border2);
@@ -76,12 +81,12 @@
     display: flex; align-items: center; justify-content: center;
     color: var(--text2);
     cursor: pointer;
-    margin-right: 14px;
     flex-shrink: 0;
     transition: all 0.15s;
   }
   .sidebar-toggle:hover { background: var(--bg3); color: var(--text); }
   .sidebar-toggle i { font-size: 17px; }
+  .sidebar.collapsed .sidebar-toggle-row { display: flex; justify-content: center; padding: 0 0 12px; }
   .sidebar-logo {
     padding: 0 18px 20px;
     border-bottom: 1px solid var(--border);
@@ -401,6 +406,12 @@
       </div>
     </div>
 
+    <div class="sidebar-toggle-row">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir/fechar menu lateral" title="Abrir/fechar menu lateral">
+        <i class="ti ti-menu-2"></i>
+      </button>
+    </div>
+
     <div class="nav-section">
       <div class="nav-label">Dashboards</div>
       <div class="nav-item active" onclick="showScreen('s1')" id="nav-s1">
@@ -436,9 +447,6 @@
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
-      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir/fechar menu lateral" title="Abrir/fechar menu lateral">
-        <i class="ti ti-menu-2"></i>
-      </button>
       <div class="topbar-title" id="topbarTitle">Dashboard — Visão Geral</div>
       <div class="topbar-right">
         <div class="topbar-chip"><div class="dot-live"></div> Atualizado agora</div>
