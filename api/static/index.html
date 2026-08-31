@@ -52,7 +52,36 @@
     flex-direction: column;
     flex-shrink: 0;
     padding: 20px 0;
+    overflow: hidden;
+    transition: width 0.2s ease;
   }
+  .sidebar.collapsed { width: 68px; }
+  .sidebar.collapsed .logo-text-wrap,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .nav-text,
+  .sidebar.collapsed .version-badge,
+  .sidebar.collapsed .user-text {
+    display: none;
+  }
+  .sidebar.collapsed .sidebar-logo .logo-mark { justify-content: center; }
+  .sidebar.collapsed .nav-item { justify-content: center; padding: 8px; }
+  .sidebar.collapsed .nav-section { padding: 0 10px; }
+  .sidebar.collapsed .sidebar-user { justify-content: center; }
+
+  .sidebar-toggle {
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text2);
+    cursor: pointer;
+    margin-right: 14px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .sidebar-toggle:hover { background: var(--bg3); color: var(--text); }
+  .sidebar-toggle i { font-size: 17px; }
   .sidebar-logo {
     padding: 0 18px 20px;
     border-bottom: 1px solid var(--border);
@@ -365,7 +394,7 @@
     <div class="sidebar-logo">
       <div class="logo-mark">
         <div class="logo-icon"><i class="ti ti-heartbeat"></i></div>
-        <div>
+        <div class="logo-text-wrap">
           <div class="logo-text">Saúde<span>BI</span></div>
           <div class="logo-sub">DATASUS / SIH-SUS</div>
         </div>
@@ -375,20 +404,20 @@
     <div class="nav-section">
       <div class="nav-label">Dashboards</div>
       <div class="nav-item active" onclick="showScreen('s1')" id="nav-s1">
-        <i class="ti ti-layout-dashboard"></i> Visão Geral
+        <i class="ti ti-layout-dashboard"></i> <span class="nav-text">Visão Geral</span>
       </div>
       <div class="nav-item" onclick="showScreen('s2')" id="nav-s2">
-        <i class="ti ti-building-hospital"></i> Capacidade Hospitalar
+        <i class="ti ti-building-hospital"></i> <span class="nav-text">Capacidade Hospitalar</span>
       </div>
       <div class="nav-item" onclick="showScreen('s3')" id="nav-s3">
-        <i class="ti ti-stethoscope"></i> Análise de Atendimento
+        <i class="ti ti-stethoscope"></i> <span class="nav-text">Análise de Atendimento</span>
       </div>
     </div>
 
     <div class="nav-section" style="margin-top:8px;">
       <div class="nav-label">Ferramentas</div>
       <div class="nav-item" onclick="showScreen('s4')" id="nav-s4">
-        <i class="ti ti-message-bolt"></i> Oracle Select AI
+        <i class="ti ti-message-bolt"></i> <span class="nav-text">Oracle Select AI</span>
       </div>
     </div>
 
@@ -396,7 +425,7 @@
       <div class="version-badge">v1.0.0 — Jun 2025</div>
       <div class="sidebar-user">
         <div class="user-avatar">GS</div>
-        <div>
+        <div class="user-text">
           <div class="user-name">Gestor de Saúde</div>
           <div class="user-role">Administrador</div>
         </div>
@@ -407,6 +436,9 @@
   <!-- MAIN -->
   <main class="main">
     <div class="topbar">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir/fechar menu lateral" title="Abrir/fechar menu lateral">
+        <i class="ti ti-menu-2"></i>
+      </button>
       <div class="topbar-title" id="topbarTitle">Dashboard — Visão Geral</div>
       <div class="topbar-right">
         <div class="topbar-chip"><div class="dot-live"></div> Atualizado agora</div>
@@ -774,6 +806,10 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
   document.getElementById('nav-' + id).classList.add('active');
   document.getElementById('topbarTitle').textContent = titles[id];
+}
+
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('collapsed');
 }
 
 const TC = 'rgba(255,255,255,0.4)';
