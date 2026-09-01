@@ -57,10 +57,30 @@
 
   /* LAYOUT — sidebar e conteudo flutuam como paineis de vidro separados */
   .layout {
+    position: relative;
     display: flex; height: 100vh; overflow: hidden;
     gap: 16px;
     padding: 16px;
   }
+
+  .sidebar-edge-toggle {
+    position: absolute;
+    top: 34px;
+    left: calc(16px + var(--sidebar) - 14px);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--blue);
+    border: 3px solid var(--page);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px -2px rgba(91,127,255,0.6);
+    transition: left 0.2s ease, transform 0.15s;
+    z-index: 20;
+  }
+  .sidebar-edge-toggle:hover { transform: scale(1.1); }
+  .sidebar.collapsed ~ .sidebar-edge-toggle { left: calc(16px + 68px - 14px); }
 
   /* SIDEBAR */
   .sidebar {
@@ -90,23 +110,6 @@
   .sidebar.collapsed .nav-section { padding: 0 10px; }
   .sidebar.collapsed .sidebar-user { justify-content: center; }
 
-  .sidebar-toggle-row {
-    padding: 12px 10px 0;
-  }
-  .sidebar-toggle {
-    background: transparent;
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    width: 30px; height: 30px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text2);
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.15s;
-  }
-  .sidebar-toggle:hover { background: var(--bg3); color: var(--text); }
-  .sidebar-toggle i { font-size: 17px; }
-  .sidebar.collapsed .sidebar-toggle-row { display: flex; justify-content: center; padding: 12px 0 0; }
   .sidebar-logo {
     padding: 0 18px 20px;
     border-bottom: 1px solid var(--border);
@@ -477,12 +480,6 @@
       </div>
     </div>
 
-    <div class="sidebar-toggle-row">
-      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir/fechar menu lateral" title="Abrir/fechar menu lateral">
-        <i class="ti ti-menu-2"></i>
-      </button>
-    </div>
-
     <div class="sidebar-footer">
       <div class="version-badge">v1.0.0 — Jun 2025</div>
       <div class="sidebar-user">
@@ -494,6 +491,10 @@
       </div>
     </div>
   </aside>
+
+  <button class="sidebar-edge-toggle" onclick="toggleSidebar()" aria-label="Abrir/fechar menu lateral" title="Abrir/fechar menu lateral">
+    <i class="ti ti-chevron-left"></i>
+  </button>
 
   <!-- MAIN -->
   <main class="main">
@@ -873,7 +874,9 @@ function showScreen(id) {
 }
 
 function toggleSidebar() {
-  document.querySelector('.sidebar').classList.toggle('collapsed');
+  const collapsed = document.querySelector('.sidebar').classList.toggle('collapsed');
+  const icon = document.querySelector('.sidebar-edge-toggle i');
+  icon.className = collapsed ? 'ti ti-chevron-right' : 'ti ti-chevron-left';
 }
 
 const TC = 'rgba(255,255,255,0.4)';
