@@ -14,34 +14,47 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:        #0f1117;
-    --bg2:       #161b27;
-    --bg3:       #1c2336;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.13);
-    --text:      #e8eaf0;
-    --text2:     #8b92a8;
-    --text3:     #5a6070;
-    --blue:      #3b82f6;
-    --blue-dim:  rgba(59,130,246,0.15);
-    --green:     #22c55e;
-    --green-dim: rgba(34,197,94,0.12);
+    --page:      #101c13;
+    --bg:        #022b22;
+    --bg2:       #06231b;
+    --bg3:       #275d46;
+    --border:    rgba(86,149,120,0.16);
+    --border2:   rgba(86,149,120,0.28);
+    --text:      #eef5f1;
+    --text2:     #9fb8ac;
+    --text3:     #63806f;
+    --blue:      #569578;
+    --blue-dim:  rgba(86,149,120,0.18);
+    --green:     #4ade80;
+    --green-dim: rgba(74,222,128,0.14);
     --amber:     #f59e0b;
-    --amber-dim: rgba(245,158,11,0.12);
-    --red:       #ef4444;
-    --red-dim:   rgba(239,68,68,0.12);
+    --amber-dim: rgba(245,158,11,0.14);
+    --red:       #f0576a;
+    --red-dim:   rgba(240,87,106,0.14);
     --purple:    #a78bfa;
-    --radius:    10px;
-    --radius-lg: 14px;
+    --radius:    14px;
+    --radius-lg: 20px;
     --sidebar:   220px;
     --font:      'Poppins', system-ui, sans-serif;
     --mono:      'Poppins', system-ui, sans-serif;
   }
 
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+  html, body { height: 100%; background: var(--page); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
 
-  /* LAYOUT */
-  .layout { display: flex; height: 100vh; overflow: hidden; }
+  /* LAYOUT — o app fica em um "cartao" flutuando sobre o fundo mais escuro */
+  .layout {
+    display: flex; height: 100vh; overflow: hidden;
+    background: var(--bg);
+  }
+  @media (min-width: 901px) {
+    .layout {
+      height: calc(100vh - 24px);
+      margin: 12px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 60px -20px rgba(0,0,0,0.6);
+    }
+  }
 
   /* SIDEBAR */
   .sidebar {
@@ -119,7 +132,8 @@
     border: 1px solid transparent;
   }
   .nav-item:hover { background: var(--bg3); color: var(--text); }
-  .nav-item.active { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.2); }
+  .nav-item.active { background: var(--blue); color: #06231b; font-weight: 500; border-color: transparent; }
+  .nav-item.active i { color: #06231b; }
   .nav-item i { font-size: 17px; }
 
   .sidebar-footer {
@@ -144,7 +158,7 @@
   }
   .user-avatar {
     width: 30px; height: 30px; border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #a78bfa);
+    background: linear-gradient(135deg, #569578, #a78bfa);
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 600; color: #fff;
     flex-shrink: 0;
@@ -181,7 +195,7 @@
   .screen.active { display: block; }
 
   /* KPI ROW */
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 16px; }
   .kpi-card {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -198,6 +212,21 @@
   .kpi-card.green::before { background: var(--green); }
   .kpi-card.amber::before { background: var(--amber); }
   .kpi-card.red::before   { background: var(--red); }
+  .kpi-card.hero {
+    background: linear-gradient(155deg, #2f7057 0%, var(--bg2) 65%);
+    border-color: var(--border2);
+  }
+  .kpi-card.hero::before { display: none; }
+  .kpi-icon {
+    width: 30px; height: 30px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; margin-bottom: 12px;
+  }
+  .kpi-card.blue .kpi-icon  { background: var(--blue-dim);  color: var(--blue); }
+  .kpi-card.green .kpi-icon { background: var(--green-dim); color: var(--green); }
+  .kpi-card.amber .kpi-icon { background: var(--amber-dim); color: var(--amber); }
+  .kpi-card.red .kpi-icon   { background: var(--red-dim);   color: var(--red); }
+  .kpi-card.hero .kpi-icon  { background: rgba(255,255,255,0.14); color: #fff; }
   .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
   .kpi-value { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; font-family: var(--mono); }
   .kpi-delta {
@@ -211,8 +240,8 @@
 
   /* CHART GRID */
   .chart-row { display: grid; gap: 12px; margin-bottom: 12px; }
-  .col-2 { grid-template-columns: 1fr 1fr; }
-  .col-3-2 { grid-template-columns: 3fr 2fr; }
+  .col-2 { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+  .col-3-2 { grid-template-columns: minmax(0,3fr) minmax(0,2fr); }
 
   .card {
     background: var(--bg2);
@@ -299,7 +328,7 @@
   }
   .ai-icon {
     width: 36px; height: 36px; border-radius: 10px;
-    background: var(--blue-dim); border: 1px solid rgba(59,130,246,0.3);
+    background: var(--blue-dim); border: 1px solid rgba(86,149,120,0.3);
     display: flex; align-items: center; justify-content: center;
     color: var(--blue); font-size: 18px;
   }
@@ -324,7 +353,7 @@
     cursor: pointer; display: flex; align-items: center; gap: 6px;
     white-space: nowrap; transition: background 0.15s;
   }
-  .ai-btn:hover { background: #2563eb; }
+  .ai-btn:hover { background: #3d7059; }
   .ai-examples-label { font-size: 11px; color: var(--text3); margin-bottom: 8px; }
   .ai-examples { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
   .ai-chip {
@@ -361,7 +390,7 @@
   .section-head p { font-size: 12px; color: var(--text3); margin-top: 3px; }
 
   /* PROC TABLE badge-type */
-  .type-clinico  { background: var(--blue-dim);  color: #60a5fa; }
+  .type-clinico  { background: var(--blue-dim);  color: #7dd3ac; }
   .type-obstetrico { background: var(--green-dim); color: #4ade80; }
   .type-cirurgico  { background: rgba(167,139,250,0.12); color: var(--purple); }
   .type-outros  { background: var(--red-dim);  color: var(--red); }
@@ -463,29 +492,33 @@
         </div>
 
         <div class="kpi-row">
-          <div class="kpi-card blue">
+          <div class="kpi-card blue hero">
+            <div class="kpi-icon"><i class="ti ti-stethoscope"></i></div>
             <div class="kpi-label">Total de internações</div>
             <div class="kpi-value" id="kpiTotalInternacoes">—</div>
             <div class="kpi-delta up"><i class="ti ti-trending-up" style="font-size:12px;"></i> +8,4% vs. 2023</div>
           </div>
           <div class="kpi-card amber">
+            <div class="kpi-icon"><i class="ti ti-clock-hour-4"></i></div>
             <div class="kpi-label">Média de permanência</div>
             <div class="kpi-value" id="kpiPermanenciaMedia">—</div>
             <div class="kpi-delta warn"><i class="ti ti-trending-up" style="font-size:12px;"></i> +0,4 dias vs. 2023</div>
           </div>
           <div class="kpi-card green">
+            <div class="kpi-icon"><i class="ti ti-bed"></i></div>
             <div class="kpi-label">Leitos disponíveis</div>
             <div class="kpi-value" id="kpiLeitosDisponiveis">—</div>
             <div class="kpi-delta down"><i class="ti ti-trending-down" style="font-size:12px;"></i> -3,1% vs. 2023</div>
           </div>
           <div class="kpi-card red">
+            <div class="kpi-icon"><i class="ti ti-gauge"></i></div>
             <div class="kpi-label">Taxa de ocupação</div>
             <div class="kpi-value" id="kpiTaxaOcupacao">—</div>
             <div class="kpi-delta up"><i class="ti ti-alert-triangle" style="font-size:12px;"></i> Acima da meta (70%)</div>
           </div>
         </div>
 
-        <div class="chart-row" style="grid-template-columns:1fr 1fr;margin-bottom:12px;">
+        <div class="chart-row" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr);margin-bottom:12px;">
           <div class="card">
             <div class="card-head">
               <div>
@@ -494,7 +527,7 @@
               </div>
             </div>
             <div class="legend">
-              <div class="leg"><div class="leg-line" style="background:#3b82f6;"></div> Internações por dia</div>
+              <div class="leg"><div class="leg-line" style="background:#569578;"></div> Internações por dia</div>
             </div>
             <div class="chart-wrap" style="height:220px;"><canvas id="trendChart" role="img" aria-label="Gráfico de linha: internações por dia em janeiro de 2024">Evolução diária de internações ao longo de janeiro de 2024, com base nos dados reais carregados.</canvas></div>
 
@@ -512,16 +545,16 @@
                 <div class="card-title">Taxa de ocupação de leitos por estado</div>
                 <div class="card-sub">Passe o mouse sobre o estado para detalhes</div>
               </div>
-              <select id="mapMetric" style="font-size:11px;padding:4px 8px;border-radius:7px;border:1px solid rgba(255,255,255,0.13);background:#1c2336;color:#e8eaf0;cursor:pointer;">
+              <select id="mapMetric" style="font-size:11px;padding:4px 8px;border-radius:7px;border:1px solid rgba(255,255,255,0.13);background:#275d46;color:#e8eaf0;cursor:pointer;">
                 <option value="ocupacao">Taxa de ocupação</option>
                 <option value="internacoes">Total de internações</option>
                 <option value="crescimento">Crescimento anual</option>
               </select>
             </div>
             <!-- Legenda de escala -->
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:10px;color:#5a6070;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:10px;color:#63806f;">
               <span>Baixo</span>
-              <div id="mapLegendBar" style="flex:1;height:6px;border-radius:3px;background:linear-gradient(to right,#1e3a5f,#3b82f6,#f59e0b,#ef4444);"></div>
+              <div id="mapLegendBar" style="flex:1;height:6px;border-radius:3px;background:linear-gradient(to right,#123d2e,#569578,#f59e0b,#ef4444);"></div>
               <span>Alto</span>
             </div>
             <!-- SVG do Brasil -->
@@ -619,10 +652,10 @@
               </svg>
 
               <!-- Tooltip -->
-              <div id="mapTooltip" style="display:none;position:absolute;background:#1c2336;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;pointer-events:none;z-index:10;min-width:150px;">
+              <div id="mapTooltip" style="display:none;position:absolute;background:#275d46;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 12px;pointer-events:none;z-index:10;min-width:150px;">
                 <div id="ttTitle" style="font-size:12px;font-weight:500;color:#e8eaf0;margin-bottom:4px;"></div>
                 <div id="ttValue" style="font-size:13px;font-weight:600;font-family:'Poppins',sans-serif;"></div>
-                <div id="ttSub" style="font-size:10px;color:#5a6070;margin-top:2px;"></div>
+                <div id="ttSub" style="font-size:10px;color:#63806f;margin-top:2px;"></div>
               </div>
             </div>
           </div>
@@ -636,8 +669,8 @@
             </div>
           </div>
           <div class="legend">
-            <div class="leg"><div class="leg-dot" style="background:#3b82f6;"></div> Ocupados</div>
-            <div class="leg"><div class="leg-dot" style="background:#1e3a5f;"></div> Disponíveis</div>
+            <div class="leg"><div class="leg-dot" style="background:#569578;"></div> Ocupados</div>
+            <div class="leg"><div class="leg-dot" style="background:#123d2e;"></div> Disponíveis</div>
           </div>
           <div class="chart-wrap" style="height:200px;"><canvas id="bedChart" role="img" aria-label="Barras agrupadas de leitos por região">Leitos: Sudeste 18k ocupados / 5.8k disponíveis; Nordeste 12k / 3.9k.</canvas></div>
         </div>
@@ -726,7 +759,7 @@
               </div>
             </div>
             <div class="legend">
-              <div class="leg"><div class="leg-line" style="background:#3b82f6;"></div> Clínico</div>
+              <div class="leg"><div class="leg-line" style="background:#569578;"></div> Clínico</div>
               <div class="leg"><div class="leg-line" style="background:#a78bfa;"></div> Cirúrgico</div>
               <div class="leg"><div class="leg-dash" style="border-color:#22c55e;"></div> Obstétrico</div>
             </div>
@@ -824,7 +857,7 @@ const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov
 
 const baseOpts = (extra) => ({
   responsive: true, maintainAspectRatio: false,
-  plugins: { legend: { display: false }, tooltip: { titleFont:{size:11}, bodyFont:{size:11}, backgroundColor:'#1c2336', borderColor:'rgba(255,255,255,0.1)', borderWidth:1 } },
+  plugins: { legend: { display: false }, tooltip: { titleFont:{size:11}, bodyFont:{size:11}, backgroundColor:'#275d46', borderColor:'rgba(255,255,255,0.1)', borderWidth:1 } },
   scales: { x: { ticks:{color:TC,font:{size:10}}, grid:{color:GC} }, y: { ticks:{color:TC,font:{size:10}}, grid:{color:GC} } },
   ...extra
 });
@@ -849,9 +882,9 @@ async function carregarTendenciaMensal() {
     data: {
       labels,
       datasets: [{
-        label: 'Internações por dia', data: valores, borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59,130,246,0.06)', fill: true, tension: 0.4,
-        borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#3b82f6',
+        label: 'Internações por dia', data: valores, borderColor: '#569578',
+        backgroundColor: 'rgba(86,149,120,0.12)', fill: true, tension: 0.4,
+        borderWidth: 2, pointRadius: 2, pointBackgroundColor: '#569578',
       }],
     },
     options: baseOpts({}),
@@ -872,7 +905,7 @@ function renderWeekdayChart(dadosDiarios) {
   });
 
   const medias = somas.map((soma, i) => contagens[i] ? Math.round(soma / contagens[i]) : 0);
-  const corFimDeSemana = (idx) => (idx === 0 || idx === 6) ? '#f59e0b' : '#3b82f6';
+  const corFimDeSemana = (idx) => (idx === 0 || idx === 6) ? '#f59e0b' : '#569578';
 
   new Chart(document.getElementById('weekdayChart'), {
     type: 'bar',
@@ -897,8 +930,8 @@ async function carregarLeitosRegiao() {
     data: {
       labels: data.map(d => d.regiao),
       datasets: [
-        { label: 'Ocupados', data: data.map(d => d.ocupados), backgroundColor: '#3b82f6', borderRadius: 3 },
-        { label: 'Disponíveis', data: data.map(d => d.disponiveis), backgroundColor: '#1e3a5f', borderRadius: 3 },
+        { label: 'Ocupados', data: data.map(d => d.ocupados), backgroundColor: '#569578', borderRadius: 3 },
+        { label: 'Disponíveis', data: data.map(d => d.disponiveis), backgroundColor: '#123d2e', borderRadius: 3 },
       ],
     },
     options: baseOpts({}),
@@ -910,7 +943,7 @@ carregarTendenciaMensal();
 carregarLeitosRegiao();
 
 function corPorStatus(status) {
-  return { critico: '#ef4444', atencao: '#f59e0b', normal: '#22c55e' }[status] || '#5a6070';
+  return { critico: '#ef4444', atencao: '#f59e0b', normal: '#22c55e' }[status] || '#63806f';
 }
 function badgePorStatus(status) {
   return { critico: 'badge-red', atencao: 'badge-amber', normal: 'badge-green' }[status];
@@ -957,7 +990,7 @@ function renderScatterHospitais(hospitais) {
         legend: { display: false },
         tooltip: {
           titleFont: { size: 11 }, bodyFont: { size: 11 },
-          backgroundColor: '#1c2336', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+          backgroundColor: '#275d46', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
           callbacks: {
             title: (items) => items[0].raw.nome,
             label: (item) => `${item.raw.x.toLocaleString('pt-BR')} internações · ${item.raw.y}% ocupação · ${item.raw.permanencia} dias`,
@@ -992,7 +1025,7 @@ async function carregarHospitais() {
 function corPorOcupacao(taxa) {
   if (taxa >= 90) return '#ef4444';
   if (taxa >= 75) return '#f59e0b';
-  return '#3b82f6';
+  return '#569578';
 }
 
 async function carregarOcupacaoEstados() {
@@ -1005,7 +1038,7 @@ async function carregarOcupacaoEstados() {
 }
 
 const corPorTipoAtendimento = {
-  clinico: '#3b82f6',
+  clinico: '#569578',
   cirurgico: '#a78bfa',
   obstetrico: '#22c55e',
   psiquiatrico: '#f59e0b',
@@ -1026,7 +1059,7 @@ async function carregarTiposAtendimento() {
       labels: data.distribuicao.map(d => d.tipo),
       datasets: [{
         data: data.distribuicao.map(d => d.percentual),
-        backgroundColor: data.distribuicao.map(d => corPorTipoAtendimento[d.tipo] || '#5a6070'),
+        backgroundColor: data.distribuicao.map(d => corPorTipoAtendimento[d.tipo] || '#63806f'),
         borderWidth: 0,
       }],
     },
@@ -1035,7 +1068,7 @@ async function carregarTiposAtendimento() {
 
   const legend = document.getElementById('tiposLegend');
   legend.innerHTML = data.distribuicao.map(d => `
-    <div class="leg"><div class="leg-dot" style="background:${corPorTipoAtendimento[d.tipo] || '#5a6070'};"></div> ${rotuloTipoAtendimento(d.tipo)} ${d.percentual}%</div>
+    <div class="leg"><div class="leg-dot" style="background:${corPorTipoAtendimento[d.tipo] || '#63806f'};"></div> ${rotuloTipoAtendimento(d.tipo)} ${d.percentual}%</div>
   `).join('');
 
   const tbody = document.querySelector('#s3 tbody');
@@ -1055,7 +1088,7 @@ new Chart(document.getElementById('growthChart'), {
   data:{
     labels:gLabels,
     datasets:[
-      {label:'Clínico',   data:Array.from({length:24},(_,i)=>Math.round(100+i*1.05+Math.sin(i)*1.5)), borderColor:'#3b82f6', borderWidth:2, pointRadius:0, tension:0.4, fill:false},
+      {label:'Clínico',   data:Array.from({length:24},(_,i)=>Math.round(100+i*1.05+Math.sin(i)*1.5)), borderColor:'#569578', borderWidth:2, pointRadius:0, tension:0.4, fill:false},
       {label:'Cirúrgico', data:Array.from({length:24},(_,i)=>Math.round(100+i*0.82+Math.cos(i)*2)),   borderColor:'#a78bfa', borderWidth:2, pointRadius:0, tension:0.4, fill:false},
       {label:'Obstétrico',data:Array.from({length:24},(_,i)=>Math.round(100+i*0.22+Math.sin(i*1.3))),  borderColor:'#22c55e', borderDash:[5,4], borderWidth:1.5, pointRadius:0, tension:0.4, fill:false}
     ]
@@ -1067,7 +1100,7 @@ let aiChartInst = new Chart(document.getElementById('aiChart'), {
   type:'bar',
   data:{
     labels:['Norte','Nordeste','C-Oeste','Sudeste','Sul'],
-    datasets:[{label:'Crescimento %',data:[14.2,11.8,9.1,8.4,5.2],backgroundColor:['#3b82f6','#22c55e','#a78bfa','#f59e0b','#ef4444'],borderRadius:4,borderWidth:0}]
+    datasets:[{label:'Crescimento %',data:[14.2,11.8,9.1,8.4,5.2],backgroundColor:['#569578','#22c55e','#a78bfa','#f59e0b','#ef4444'],borderRadius:4,borderWidth:0}]
   },
   options:{...baseOpts({indexAxis:'y'}),scales:{x:{ticks:{color:TC,font:{size:10},callback:v=>v+'%'},grid:{color:GC}},y:{ticks:{color:TC,font:{size:11}},grid:{color:GC}}}}
 });
@@ -1114,7 +1147,7 @@ function atualizarGraficoAI(dadosJson) {
     type: 'bar',
     data: {
       labels: linhas.map(l => l[chaveLabel]),
-      datasets: [{ label: chaveValor, data: linhas.map(l => l[chaveValor]), backgroundColor: '#3b82f6', borderRadius: 4, borderWidth: 0 }],
+      datasets: [{ label: chaveValor, data: linhas.map(l => l[chaveValor]), backgroundColor: '#569578', borderRadius: 4, borderWidth: 0 }],
     },
     options: { ...baseOpts({ indexAxis: 'y' }) },
   });
