@@ -69,9 +69,7 @@
   .sidebar.collapsed .sidebar-user { justify-content: center; }
 
   .sidebar-toggle-row {
-    padding: 0 10px 12px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    padding: 12px 10px 0;
   }
   .sidebar-toggle {
     background: transparent;
@@ -86,7 +84,7 @@
   }
   .sidebar-toggle:hover { background: var(--bg3); color: var(--text); }
   .sidebar-toggle i { font-size: 17px; }
-  .sidebar.collapsed .sidebar-toggle-row { display: flex; justify-content: center; padding: 0 0 12px; }
+  .sidebar.collapsed .sidebar-toggle-row { display: flex; justify-content: center; padding: 12px 0 0; }
   .sidebar-logo {
     padding: 0 18px 20px;
     border-bottom: 1px solid var(--border);
@@ -406,12 +404,6 @@
       </div>
     </div>
 
-    <div class="sidebar-toggle-row">
-      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir/fechar menu lateral" title="Abrir/fechar menu lateral">
-        <i class="ti ti-menu-2"></i>
-      </button>
-    </div>
-
     <div class="nav-section">
       <div class="nav-label">Dashboards</div>
       <div class="nav-item active" onclick="showScreen('s1')" id="nav-s1">
@@ -430,6 +422,12 @@
       <div class="nav-item" onclick="showScreen('s4')" id="nav-s4">
         <i class="ti ti-message-bolt"></i> <span class="nav-text">Oracle Select AI</span>
       </div>
+    </div>
+
+    <div class="sidebar-toggle-row">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir/fechar menu lateral" title="Abrir/fechar menu lateral">
+        <i class="ti ti-menu-2"></i>
+      </button>
     </div>
 
     <div class="sidebar-footer">
