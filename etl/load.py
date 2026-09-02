@@ -8,7 +8,7 @@ import pandas as pd
 from etl.download import baixar_sih, baixar_cnes
 from etl.transform import limpar_internacoes, regiao_da_uf, classificar_tipo_procedimento
 
-UFS = ["AC", "DF", "CE", "SC", "AM"]
+UFS = ["AC", "DF", "CE", "SC", "AM", "ES"]
 ANO, MES = 2026, 5
 
 
