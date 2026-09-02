@@ -9,7 +9,7 @@ from etl.download import baixar_sih, baixar_cnes
 from etl.transform import limpar_internacoes, regiao_da_uf, classificar_tipo_procedimento
 
 UFS = ["AC", "DF", "CE", "SC", "AM"]
-ANO, MES = 2024, 1
+ANO, MES = 2026, 5
 
 
 def conectar():

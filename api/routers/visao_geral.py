@@ -7,20 +7,20 @@ router = APIRouter(prefix="/api", tags=["visao-geral"])
 
 
 @router.get("/kpis")
-def kpis(ano: int = 2024, conn=Depends(get_connection)):
+def kpis(ano: int = 2026, conn=Depends(get_connection)):
     return q.get_kpis(conn, ano)
 
 
 @router.get("/tendencia-mensal")
-def tendencia_mensal(ano: int = 2024, conn=Depends(get_connection)):
+def tendencia_mensal(ano: int = 2026, conn=Depends(get_connection)):
     return q.get_tendencia_mensal(conn, ano)
 
 
 @router.get("/tendencia-diaria")
-def tendencia_diaria(ano: int = 2024, mes: int = 1, conn=Depends(get_connection)):
+def tendencia_diaria(ano: int = 2026, mes: int = 5, conn=Depends(get_connection)):
     return q.get_tendencia_diaria(conn, ano, mes)
 
 
 @router.get("/leitos-regiao")
-def leitos_regiao(ano: int = 2024, conn=Depends(get_connection)):
+def leitos_regiao(ano: int = 2026, conn=Depends(get_connection)):
     return q.get_leitos_regiao(conn, ano)

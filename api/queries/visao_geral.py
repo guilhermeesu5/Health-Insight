@@ -1,5 +1,5 @@
-# A carga atual do ETL cobre apenas a competência 2024-01 (ver
-# etl/load.py: ANO, MES = 2024, 1) — um único mês de 31 dias — não o
+# A carga atual do ETL cobre apenas a competência 2026-05 (ver
+# etl/load.py: ANO, MES = 2026, 5) — um único mês de 31 dias — não o
 # ano inteiro. Ajustar esta constante (ou torná-la dependente de mes)
 # se mais competências forem carregadas no futuro.
 DIAS_CARGA_ATUAL = 31
